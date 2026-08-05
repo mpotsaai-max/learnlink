@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutor Profile — LearnLink</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.slot-btn {
+  padding: 10px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface-raised); color: var(--text-primary); font-size: 13px;
+  font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s;
+}
+.slot-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+.slot-btn.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+.slot-btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--surface); color: var(--text-tertiary); }
+.package-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 12px; cursor: pointer; transition: all 0.15s;
+}
+.package-card:hover { border-color: var(--accent); }
+.package-card.selected { border-color: var(--accent); background: var(--accent-soft); }
+.package-card h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.package-card .price { font-size: 20px; font-weight: 600; color: var(--accent); margin: 8px 0; }
+.package-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.booking-type-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.booking-type-tab {
+  flex: 1; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-secondary); font-size: 14px; font-weight: 500;
+  cursor: pointer; text-align: center; transition: all 0.15s;
+}
+.booking-type-tab:hover { border-color: var(--border-light); color: var(--text-primary); }
+.booking-type-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="nav-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      LearnLink
+    </a>
+    <div class="nav-links" id="nav-links"></div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="section">
+    <div id="profile-content">
+      <div class="loading">Loading tutor profile...</div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+const tutorId = new URLSearchParams(window.location.search).get('id');
+if (!tutorId) window.location.href = '/';
+
+let currentTutor = null;
+let selectedDate = null;
+let selectedTime = null;
+let selectedPackageId = null;
+let bookingType = 'session';
+
+async function loadTutor() {
+  try {
+    const t = await tutors.get(tutorId);
+    currentTutor = t;
+    const initials = t.full_name.split(' ').map(n => n[0]).join('').slice(0,2);
+    const subjects = t.subjects.split(',').map(s => `<span class="tag">${s.trim()}</span>`).join('');
+    const levels = t.levels.split(',').map(l => `<span class="tag">${l.trim()}</span>`).join('');
+    const isLoggedIn = !!getToken();
+    const tutorShare = Math.round(t.price_per_hour * 0.85);
+
+    // Build packages HTML
+    let packagesHtml = '';
+    if (t.packages && t.packages.length > 0) {
+      packagesHtml = `
+        <div class="profile-section">
+          <h2>Monthly Packages</h2>
+          <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px;">
+            Subscribe monthly and save. All sessions are held online via video call.
+          </p>
+          <div id="packages-list">
+            ${t.packages.map(pkg => `
+              <div class="package-card" data-id="${pkg.id}" onclick="selectPackage(${pkg.id})">
+                <h4>${pkg.name}</h4>
+                <div class="price">P${pkg.price_per_month}<span style="font-size:14px;font-weight:400;color:var(--text-tertiary);">/month</span></div>
+                <p>${pkg.description || ''}</p>
+                <p style="margin-top:6px;"><span class="tag">${pkg.sessions_included} sessions</span> <span class="tag">${pkg.subjects}</span></p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // Build booking panel
+    let bookingPanel = '';
+    if (isLoggedIn) {
+      bookingPanel = `
+        <div class="booking-panel">
+          <h3>Book with ${t.full_name.split(' ')[0]}</h3>
+
+          <div class="booking-type-tabs">
+            <div class="booking-type-tab active" onclick="setBookingType('session')">Single Session</div>
+            <div class="booking-type-tab" onclick="setBookingType('package')">Monthly Package</div>
+          </div>
+
+          <div id="session-booking">
+            <div class="price">P${t.price_per_hour} <span style="font-size:14px;font-weight:400;color:var(--text-tertiary);">per hour</span></div>
+            <div style="background:var(--accent-soft); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:16px;">
+              <p style="font-size:12px; color:var(--accent); line-height:1.5; margin:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:4px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                Tutor receives <strong>P${tutorShare}</strong> after 15% platform fee. Online video session via LearnLink.
+              </p>
+            </div>
+            <form id="booking-form">
+              <div class="form-group">
+                <label class="form-label">Subject</label>
+                <select class="form-select" id="book-subject" required>
+                  ${t.subjects.split(',').map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('')}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Pick a date</label>
+                <input type="date" class="form-input" id="book-date" required min="${new Date().toISOString().split('T')[0]}">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Available time slots</label>
+                <div id="slots-container" style="color:var(--text-tertiary);font-size:13px;">Select a date to see available slots</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Notes (optional)</label>
+                <textarea class="form-textarea" id="book-notes" placeholder="What would you like to focus on?"></textarea>
+              </div>
+              <button type="submit" class="btn btn-accent" style="width:100%;" id="book-btn" disabled>Send booking request</button>
+            </form>
+          </div>
+
+          <div id="package-booking" style="display:none;">
+            <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px;">Select a monthly package above, then click subscribe.</p>
+            <div id="package-selected-info" style="display:none; background:var(--surface-raised); border-radius:var(--radius-sm); padding:14px; margin-bottom:16px;">
+              <p style="font-size:14px; color:var(--text-primary); margin:0;"><strong id="sel-pkg-name"></strong></p>
+              <p style="font-size:13px; color:var(--text-secondary); margin:4px 0 0;"><span id="sel-pkg-price"></span> — <span id="sel-pkg-sessions"></span> sessions</p>
+            </div>
+            <button class="btn btn-accent" style="width:100%;" id="subscribe-btn" disabled onclick="subscribePackage()">Subscribe to package</button>
+          </div>
+
+          <div class="alert alert-success" id="book-alert" style="margin-top:12px;"></div>
+        </div>
+      `;
+    } else {
+      bookingPanel = `
+        <div class="booking-panel">
+          <h3>Book a session</h3>
+          <div class="price">P${t.price_per_hour} <span style="font-size:14px;font-weight:400;color:var(--text-tertiary);">per hour</span></div>
+          <div style="background:var(--accent-soft); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:12px;">
+            <p style="font-size:12px; color:var(--accent); line-height:1.5; margin:0;">
+              Tutor receives <strong>P${tutorShare}</strong> after 15% platform fee. Online video session.
+            </p>
+          </div>
+          <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">Log in to book a session or subscribe to a monthly package.</p>
+          <a href="/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}" class="btn btn-accent" style="width:100%;">Log in to book</a>
+        </div>
+      `;
+    }
+
+    document.getElementById('profile-content').innerHTML = `
+      <div class="grid-2" style="align-items:start;">
+        <div>
+          <div class="profile-header">
+            <div class="profile-avatar">${initials}</div>
+            <div class="profile-info">
+              <h1>${t.full_name}</h1>
+              <div class="meta">${t.education || 'Experienced tutor'} · ${t.location}</div>
+              <div class="profile-price">P${t.price_per_hour} <span style="font-size:16px;font-weight:400;color:var(--text-tertiary);">per session (1 hour)</span></div>
+              <div class="tutor-tags" style="margin-top:12px;">${subjects}${levels}</div>
+            </div>
+          </div>
+          <div class="profile-section">
+            <h2>About</h2>
+            <p>${t.bio || 'No bio provided yet.'}</p>
+          </div>
+          <div class="profile-section">
+            <h2>Education</h2>
+            <p>${t.education || 'Not specified'}</p>
+          </div>
+          ${packagesHtml}
+        </div>
+        <div>${bookingPanel}</div>
+      </div>
+    `;
+
+    // Attach event listeners
+    const dateInput = document.getElementById('book-date');
+    if (dateInput) {
+      dateInput.addEventListener('change', async (e) => {
+        selectedDate = e.target.value;
+        selectedTime = null;
+        document.getElementById('book-btn').disabled = true;
+        document.getElementById('book-btn').textContent = 'Send booking request';
+        await loadSlots(tutorId, selectedDate);
+      });
+    }
+
+    const form = document.getElementById('booking-form');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('book-btn');
+        const alert = document.getElementById('book-alert');
+        alert.classList.remove('show', 'alert-error');
+        alert.classList.add('alert-success');
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+
+        try {
+          await bookings.create({
+            tutor_id: parseInt(tutorId),
+            booking_type: 'session',
+            subject: document.getElementById('book-subject').value,
+            session_date: selectedDate,
+            session_time: selectedTime,
+            notes: document.getElementById('book-notes').value
+          });
+          alert.textContent = 'Booking request sent! The tutor will confirm and you will receive a video call link.';
+          alert.classList.add('show');
+          btn.textContent = 'Request sent';
+          form.reset();
+          document.getElementById('slots-container').innerHTML = 'Select a date to see available slots';
+        } catch (err) {
+          alert.textContent = err.message;
+          alert.classList.remove('alert-success');
+          alert.classList.add('alert-error');
+          alert.classList.add('show');
+          btn.disabled = false;
+          btn.textContent = 'Send booking request';
+        }
+      });
+    }
+  } catch (err) {
+    document.getElementById('profile-content').innerHTML = `
+      <div class="empty-state"><h3>Tutor not found</h3><p>${err.message}</p><a href="/" class="btn btn-primary" style="margin-top:16px;">Back to home</a></div>
+    `;
+  }
+}
+
+async function loadSlots(tutorId, date) {
+  const container = document.getElementById('slots-container');
+  container.innerHTML = '<div style="font-size:13px;color:var(--text-tertiary);">Loading slots...</div>';
+  try {
+    const data = await tutors.availability(tutorId, date);
+    if (data.slots.length === 0) {
+      container.innerHTML = '<div style="font-size:13px;color:var(--text-tertiary);">No available slots on this day. Try another date.</div>';
+      return;
+    }
+    container.innerHTML = `<div class="slot-grid">${data.slots.map(time => `
+      <button type="button" class="slot-btn" data-time="${time}" onclick="selectSlot(this, '${time}')">${time}</button>
+    `).join('')}</div>`;
+  } catch (err) {
+    container.innerHTML = `<div style="font-size:13px;color:var(--danger);">${err.message}</div>`;
+  }
+}
+
+function selectSlot(btn, time) {
+  document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedTime = time;
+  document.getElementById('book-btn').disabled = false;
+}
+
+function setBookingType(type) {
+  bookingType = type;
+  document.querySelectorAll('.booking-type-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('session-booking').style.display = type === 'session' ? 'block' : 'none';
+  document.getElementById('package-booking').style.display = type === 'package' ? 'block' : 'none';
+}
+
+function selectPackage(id) {
+  selectedPackageId = id;
+  document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.package-card[data-id="${id}"]`).classList.add('selected');
+  const pkg = currentTutor.packages.find(p => p.id === id);
+  if (pkg) {
+    document.getElementById('sel-pkg-name').textContent = pkg.name;
+    document.getElementById('sel-pkg-price').textContent = 'P' + pkg.price_per_month + '/month';
+    document.getElementById('sel-pkg-sessions').textContent = pkg.sessions_included + ' sessions';
+    document.getElementById('package-selected-info').style.display = 'block';
+    document.getElementById('subscribe-btn').disabled = false;
+  }
+}
+
+async function subscribePackage() {
+  const btn = document.getElementById('subscribe-btn');
+  const alert = document.getElementById('book-alert');
+  alert.classList.remove('show', 'alert-error');
+  alert.classList.add('alert-success');
+  btn.disabled = true;
+  btn.textContent = 'Subscribing...';
+
+  try {
+    await subscriptions.create({
+      tutor_id: parseInt(tutorId),
+      package_id: selectedPackageId,
+      start_date: new Date().toISOString().split('T')[0]
+    });
+    alert.textContent = 'Subscription created! Go to your dashboard to book sessions using your package credits.';
+    alert.classList.add('show');
+    btn.textContent = 'Subscribed';
+  } catch (err) {
+    alert.textContent = err.message;
+    alert.classList.remove('alert-success');
+    alert.classList.add('alert-error');
+    alert.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Subscribe to package';
+  }
+}
+
+loadTutor();
+</script>
+
+</body>
+</html>

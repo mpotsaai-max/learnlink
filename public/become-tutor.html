@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Become a Tutor — LearnLink</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="nav-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      LearnLink
+    </a>
+    <div class="nav-links" id="nav-links"></div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="section" style="max-width:600px;margin:0 auto;padding-top:48px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <h1 style="font-size:28px;font-weight:600;margin-bottom:8px;">Become a tutor</h1>
+      <p style="color:var(--text-secondary);font-size:15px;">Share your knowledge and earn on your own schedule</p>
+    </div>
+
+    <div class="card" style="margin-bottom:24px; border-left:3px solid var(--accent);">
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <div>
+          <p style="font-size:14px; font-weight:500; color:var(--text-primary); margin-bottom:4px;">Commission structure</p>
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.5;">LearnLink takes a <strong style="color:var(--accent);">15% commission</strong> on every booking you receive through the platform. For example, if you charge <strong>P200 per session</strong>, you will receive <strong>P170</strong> and we keep <strong>P30</strong>. You are paid within 24 hours after each completed session.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-error" id="error-alert"></div>
+    <div class="alert alert-success" id="success-alert"></div>
+
+    <form id="tutor-form">
+      <div class="form-group">
+        <label class="form-label">Bio <span style="color:var(--text-tertiary);">(tell students about yourself)</span></label>
+        <textarea class="form-textarea" id="bio" required placeholder="I am a passionate mathematics tutor with 5 years of experience..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subjects you teach <span style="color:var(--text-tertiary);">(comma separated)</span></label>
+        <input type="text" class="form-input" id="subjects" required placeholder="Mathematics, Physics, Chemistry">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Levels you teach <span style="color:var(--text-tertiary);">(comma separated)</span></label>
+        <input type="text" class="form-input" id="levels" required placeholder="BGCSE, IGCSE, University">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Price per session (Pula)</label>
+        <input type="number" class="form-input" id="price" required min="50" placeholder="150" value="150">
+        <p class="form-hint">Each session is 1 hour. You set your own rate.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your location</label>
+        <select class="form-select" id="location" required>
+          <option value="">Select location</option>
+          <option value="Gaborone">Gaborone</option>
+          <option value="Francistown">Francistown</option>
+          <option value="Maun">Maun</option>
+          <option value="Palapye">Palapye</option>
+          <option value="Serowe">Serowe</option>
+          <option value="Lobatse">Lobatse</option>
+          <option value="Kanye">Kanye</option>
+          <option value="Molepolole">Molepolole</option>
+          <option value="Kasane">Kasane</option>
+          <option value="Mahalapye">Mahalapye</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Education / Qualifications</label>
+        <input type="text" class="form-input" id="education" placeholder="BSc Mathematics, University of Botswana">
+      </div>
+      <div class="form-group" style="display:flex; gap:10px; align-items:flex-start;">
+        <input type="checkbox" id="agree-commission" required style="margin-top:4px; accent-color:var(--accent); width:16px; height:16px; flex-shrink:0;">
+        <label for="agree-commission" style="font-size:13px; color:var(--text-secondary); line-height:1.5; cursor:pointer;">
+          I understand and agree that LearnLink will deduct a <strong>15% commission</strong> from each booking I receive through this platform. I have read and agree to the <a href="/terms.html" target="_blank">Terms and Conditions</a>.
+        </label>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;" id="submit-btn">
+        Submit application
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+requireAuth();
+
+document.getElementById('tutor-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const errorAlert = document.getElementById('error-alert');
+  const successAlert = document.getElementById('success-alert');
+  errorAlert.classList.remove('show');
+  successAlert.classList.remove('show');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  try {
+    await tutors.apply({
+      bio: document.getElementById('bio').value,
+      subjects: document.getElementById('subjects').value,
+      levels: document.getElementById('levels').value,
+      price_per_hour: parseInt(document.getElementById('price').value),
+      location: document.getElementById('location').value,
+      education: document.getElementById('education').value
+    });
+    successAlert.textContent = 'Application submitted! An admin will review your profile shortly.';
+    successAlert.classList.add('show');
+    btn.textContent = 'Application sent';
+    document.getElementById('tutor-form').reset();
+  } catch (err) {
+    errorAlert.textContent = err.message;
+    errorAlert.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Submit application';
+  }
+});
+</script>
+
+</body>
+</html>

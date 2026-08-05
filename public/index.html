@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LearnLink — Find Your Perfect Tutor</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="nav-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      LearnLink
+    </a>
+    <div class="nav-links" id="nav-links">
+      <a href="/login.html" class="nav-link">Log in</a>
+      <a href="/register.html" class="btn btn-sm btn-primary">Sign up</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+      Now serving Botswana — PSLE to University
+    </div>
+    <h1>Find the perfect tutor.<br><span>Book in minutes.</span></h1>
+    <p>Qualified tutors for every subject, every level. In-person or online — you choose when, where, and how you learn.</p>
+    <div class="hero-actions">
+      <a href="#tutors" class="btn btn-lg btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Browse tutors
+      </a>
+      <a href="/become-tutor.html" class="btn btn-lg btn-secondary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Become a tutor
+      </a>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-number" id="stat-tutors">46+</div>
+      <div class="stat-label">Verified tutors</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="stat-subjects">35+</div>
+      <div class="stat-label">Subjects covered</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="stat-bookings">120+</div>
+      <div class="stat-label">Lessons delivered</div>
+    </div>
+  </div>
+
+  <!-- Tutors Section -->
+  <section class="section" id="tutors">
+    <h2 class="section-title">Find a tutor</h2>
+    <p class="section-sub">Browse qualified educators across Botswana.</p>
+
+    <div class="filter-bar">
+      <div class="form-group">
+        <input type="text" class="form-input" id="search-input" placeholder="Search by name or subject...">
+      </div>
+      <div class="form-group">
+        <select class="form-select" id="subject-filter">
+          <option value="">All subjects</option>
+          <option value="Mathematics">Mathematics</option>
+          <option value="Physics">Physics</option>
+          <option value="Chemistry">Chemistry</option>
+          <option value="Biology">Biology</option>
+          <option value="English">English</option>
+          <option value="Setswana">Setswana</option>
+          <option value="Accounting">Accounting</option>
+          <option value="Business Studies">Business Studies</option>
+          <option value="Computer Science">Computer Science</option>
+          <option value="History">History</option>
+          <option value="Geography">Geography</option>
+          <option value="Agriculture">Agriculture</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <select class="form-select" id="level-filter">
+          <option value="">All levels</option>
+          <option value="PSLE">PSLE</option>
+          <option value="JCE">JCE</option>
+          <option value="BGCSE">BGCSE</option>
+          <option value="IGCSE">IGCSE</option>
+          <option value="University">University</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <select class="form-select" id="location-filter">
+          <option value="">All locations</option>
+          <option value="Gaborone">Gaborone</option>
+          <option value="Francistown">Francistown</option>
+          <option value="Maun">Maun</option>
+          <option value="Palapye">Palapye</option>
+          <option value="Serowe">Serowe</option>
+          <option value="Lobatse">Lobatse</option>
+          <option value="Kanye">Kanye</option>
+          <option value="Molepolole">Molepolole</option>
+          <option value="Kasane">Kasane</option>
+          <option value="Mahalapye">Mahalapye</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="tutors-list" class="tutor-grid">
+      <div class="loading">Loading tutors...</div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section">
+    <h2 class="section-title">How it works</h2>
+    <p class="section-sub">Three simple steps to start learning.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Search</h3>
+        <p>Browse tutors by subject, level, location, or price. Filter to find your perfect match.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Book</h3>
+        <p>Pick a date and time that works for you. Send a booking request in seconds.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Learn</h3>
+        <p>Meet your tutor and start improving. Pay cash or M-Pesa after each session.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subjects -->
+  <section class="section">
+    <h2 class="section-title">Subjects we cover</h2>
+    <p class="section-sub">From primary school to university level.</p>
+    <div class="subject-grid">
+      <div class="subject-item">Mathematics <span>All levels</span></div>
+      <div class="subject-item">Physics <span>BGCSE / IGCSE</span></div>
+      <div class="subject-item">Chemistry <span>BGCSE / IGCSE</span></div>
+      <div class="subject-item">Biology <span>All levels</span></div>
+      <div class="subject-item">English <span>All levels</span></div>
+      <div class="subject-item">Setswana <span>All levels</span></div>
+      <div class="subject-item">Accounting <span>BGCSE+</span></div>
+      <div class="subject-item">Business Studies <span>BGCSE+</span></div>
+      <div class="subject-item">Computer Science <span>All levels</span></div>
+      <div class="subject-item">History <span>All levels</span></div>
+      <div class="subject-item">Geography <span>All levels</span></div>
+      <div class="subject-item">Agriculture <span>JCE+</span></div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="section">
+    <div class="cta-banner">
+      <h2>Ready to start?</h2>
+      <p>Whether you need a tutor or want to become one, we are here to help.</p>
+      <div class="hero-actions">
+        <a href="/register.html" class="btn btn-lg btn-primary">Create free account</a>
+        <a href="/become-tutor.html" class="btn btn-lg btn-secondary">Apply as a tutor</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer class="footer">
+  <p>LearnLink — Connecting students with great tutors across Botswana.</p>
+  <div class="footer-links">
+    <a href="mailto:hello@learnlink.bw">hello@learnlink.bw</a>
+    <a href="tel:+26771234567">+267 71 234 567</a>
+    <span style="color:var(--text-tertiary);font-size:13px;">Gaborone, Botswana</span>
+  </div>
+</footer>
+
+<script src="/js/app.js"></script>
+<script>
+let allTutors = [];
+
+async function loadTutors() {
+  try {
+    const params = {};
+    const subject = document.getElementById('subject-filter').value;
+    const level = document.getElementById('level-filter').value;
+    const location = document.getElementById('location-filter').value;
+    const search = document.getElementById('search-input').value;
+    if (subject) params.subject = subject;
+    if (level) params.level = level;
+    if (location) params.location = location;
+    if (search) params.search = search;
+
+    allTutors = await tutors.list(params);
+    renderTutors(allTutors);
+  } catch (err) {
+    document.getElementById('tutors-list').innerHTML = `
+      <div class="empty-state">
+        <h3>Could not load tutors</h3>
+        <p>${err.message}</p>
+      </div>
+    `;
+  }
+}
+
+function renderTutors(tutorsList) {
+  const container = document.getElementById('tutors-list');
+  if (tutorsList.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>No tutors found</h3>
+        <p>Try adjusting your filters or search terms.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = tutorsList.map(t => {
+    const initials = t.full_name.split(' ').map(n => n[0]).join('').slice(0,2);
+    const subjectTags = t.subjects.split(',').map(s => `<span class="tag">${s.trim()}</span>`).join('');
+    const levelTags = t.levels.split(',').map(l => `<span class="tag">${l.trim()}</span>`).join('');
+    return `
+      <div class="tutor-card card-hover">
+        <div class="tutor-avatar">${initials}</div>
+        <div class="tutor-info">
+          <div class="tutor-name">${t.full_name}</div>
+          <div class="tutor-meta">${t.education || 'Experienced tutor'} · ${t.location}</div>
+          <div class="tutor-tags">${subjectTags}${levelTags}</div>
+          <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.5;">${t.bio ? t.bio.slice(0,120) + (t.bio.length > 120 ? '...' : '') : ''}</p>
+        </div>
+        <div class="tutor-actions">
+          <div class="tutor-price">P${t.price_per_hour}/hr</div>
+          <a href="/tutor.html?id=${t.id}" class="btn btn-sm btn-accent">View profile</a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Event listeners
+document.getElementById('search-input').addEventListener('input', debounce(loadTutors, 300));
+document.getElementById('subject-filter').addEventListener('change', loadTutors);
+document.getElementById('level-filter').addEventListener('change', loadTutors);
+document.getElementById('location-filter').addEventListener('change', loadTutors);
+
+function debounce(fn, ms) {
+  let timeout;
+  return function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, arguments), ms);
+  };
+}
+
+loadTutors();
+</script>
+
+</body>
+</html>

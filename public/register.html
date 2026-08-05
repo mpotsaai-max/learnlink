@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up — LearnLink</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="nav-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      LearnLink
+    </a>
+    <div class="nav-links" id="nav-links"></div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="section" style="max-width:420px;margin:0 auto;padding-top:48px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <h1 style="font-size:28px;font-weight:600;margin-bottom:8px;">Create your account</h1>
+      <p style="color:var(--text-secondary);font-size:15px;">Join LearnLink to find or become a tutor</p>
+    </div>
+
+    <div class="alert alert-error" id="error-alert"></div>
+
+    <form id="register-form">
+      <div class="form-group">
+        <label class="form-label">Full name</label>
+        <input type="text" class="form-input" id="full_name" required placeholder="Your full name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input type="email" class="form-input" id="email" required placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone number</label>
+        <input type="tel" class="form-input" id="phone" placeholder="+267 71 234 567">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="password" required placeholder="Create a password" minlength="6">
+        <p class="form-hint">Minimum 6 characters</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">I want to</label>
+        <select class="form-select" id="role">
+          <option value="student">Find a tutor (Student)</option>
+          <option value="tutor">Become a tutor</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;" id="submit-btn">
+        Create account
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:24px;font-size:14px;color:var(--text-secondary);">
+      Already have an account? <a href="/login.html">Log in</a>
+    </p>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const alert = document.getElementById('error-alert');
+  alert.classList.remove('show');
+  btn.disabled = true;
+  btn.textContent = 'Creating account...';
+
+  try {
+    const data = await auth.register({
+      full_name: document.getElementById('full_name').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      password: document.getElementById('password').value,
+      role: document.getElementById('role').value
+    });
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+
+    if (data.user.role === 'tutor') {
+      window.location.href = '/become-tutor.html';
+    } else {
+      window.location.href = '/';
+    }
+  } catch (err) {
+    alert.textContent = err.message;
+    alert.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Create account';
+  }
+});
+</script>
+
+<footer class="footer" style="margin-top:48px;">
+  <p style="font-size:13px; color:var(--text-tertiary);">LearnLink — Connecting students with great tutors across Botswana.</p>
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/terms.html">Terms & Conditions</a>
+  </div>
+</footer>
+</body>
+</html>

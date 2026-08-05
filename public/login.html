@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In — LearnLink</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="nav-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      LearnLink
+    </a>
+    <div class="nav-links" id="nav-links"></div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="section" style="max-width:420px;margin:0 auto;padding-top:64px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <h1 style="font-size:28px;font-weight:600;margin-bottom:8px;">Welcome back</h1>
+      <p style="color:var(--text-secondary);font-size:15px;">Log in to your LearnLink account</p>
+    </div>
+
+    <div class="alert alert-error" id="error-alert"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input type="email" class="form-input" id="email" required placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="password" required placeholder="Enter your password">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;" id="submit-btn">
+        Log in
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:24px;font-size:14px;color:var(--text-secondary);">
+      Don't have an account? <a href="/register.html">Sign up</a>
+    </p>
+
+    <div style="margin-top:32px;padding:16px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);">
+      <p style="font-size:13px;color:var(--text-tertiary);margin-bottom:8px;"><strong>Demo accounts:</strong></p>
+      <p style="font-size:13px;color:var(--text-tertiary);">Admin: admin@learnlink.bw / admin123</p>
+      <p style="font-size:13px;color:var(--text-tertiary);">Tutors: keletso@example.com / password123</p>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const alert = document.getElementById('error-alert');
+  alert.classList.remove('show');
+  btn.disabled = true;
+  btn.textContent = 'Logging in...';
+
+  try {
+    const data = await auth.login({
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value
+    });
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    const redirect = new URLSearchParams(window.location.search).get('redirect') || '/';
+    window.location.href = redirect;
+  } catch (err) {
+    alert.textContent = err.message;
+    alert.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Log in';
+  }
+});
+</script>
+
+<footer class="footer" style="margin-top:48px;">
+  <p style="font-size:13px; color:var(--text-tertiary);">LearnLink — Connecting students with great tutors across Botswana.</p>
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/terms.html">Terms & Conditions</a>
+  </div>
+</footer>
+</body>
+</html>
