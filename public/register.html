@@ -65,6 +65,12 @@
 
 <script src="/js/app.js"></script>
 <script>
+// Pre-select tutor role if URL has ?role=tutor
+const urlRole = new URLSearchParams(window.location.search).get('role');
+if (urlRole === 'tutor') {
+  document.getElementById('role').value = 'tutor';
+}
+
 document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('submit-btn');
