@@ -74,14 +74,6 @@ npm start
 ### 5. Open in browser
 Go to http://localhost:3000
 
-## Demo Accounts
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@learnlink.bw | admin123 |
-| Tutor | keletso@example.com | password123 |
-| Tutor | thabo@example.com | password123 |
-
 ## Deploy to Render.com (Free Hosting)
 
 ### Step 1: Push to GitHub
