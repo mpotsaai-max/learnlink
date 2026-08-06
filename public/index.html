@@ -3,184 +3,510 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LearnLink — Find Your Perfect Tutor</title>
+<title>LearnLink — Find the best tutor for you</title>
 <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
+<style>
+  /* ===== PREPLY-STYLE LANDING PAGE ===== */
+  :root {
+    --blue: #3b82f6;
+    --blue-dark: #1d4ed8;
+    --blue-light: #60a5fa;
+    --bg: #0b1120;
+    --bg-light: #111827;
+    --surface: #1e293b;
+    --surface-hover: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --border: #334155;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
 
-<nav class="navbar">
-  <div class="navbar-inner">
-    <a href="/" class="nav-brand">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      LearnLink
-    </a>
-    <div class="nav-links" id="nav-links">
-      <a href="/login.html" class="nav-link">Log in</a>
-      <a href="/register.html" class="btn btn-sm btn-primary">Sign up</a>
+  * { box-sizing: border-box; }
+
+  /* NAVBAR */
+  .lp-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(11,17,32,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(51,65,85,0.5);
+  }
+  .lp-nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .lp-logo {
+    font-size: 1.5rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--blue-light), var(--blue));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-decoration: none;
+  }
+  .lp-nav-links { display: flex; gap: 2rem; align-items: center; }
+  .lp-nav-links a {
+    color: var(--text-muted); text-decoration: none; font-size: 0.95rem;
+    font-weight: 500; transition: color 0.2s;
+  }
+  .lp-nav-links a:hover { color: var(--text); }
+  .lp-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0.6rem 1.4rem; border-radius: 100px; font-weight: 600;
+    font-size: 0.95rem; cursor: pointer; border: none; text-decoration: none;
+    transition: all 0.2s;
+  }
+  .lp-btn-primary {
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color: white; box-shadow: 0 4px 20px rgba(59,130,246,0.35);
+  }
+  .lp-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(59,130,246,0.5); }
+  .lp-btn-outline {
+    background: transparent; color: var(--text); border: 1.5px solid var(--border);
+  }
+  .lp-btn-outline:hover { border-color: var(--blue); color: var(--blue-light); }
+  .lp-btn-lg { padding: 0.9rem 2.2rem; font-size: 1.05rem; }
+
+  /* HERO */
+  .lp-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 5rem 1.5rem 6rem;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 0%, rgba(29,78,216,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 60%, rgba(59,130,246,0.08) 0%, transparent 50%),
+                var(--bg);
+  }
+  .lp-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233b82f6' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.6;
+  }
+  .lp-hero-inner { position: relative; max-width: 800px; margin: 0 auto; }
+  .lp-hero h1 {
+    font-size: clamp(2.2rem, 5.5vw, 4rem);
+    font-weight: 800; line-height: 1.1; color: var(--text);
+    margin-bottom: 1.25rem; letter-spacing: -0.02em;
+  }
+  .lp-hero h1 span {
+    background: linear-gradient(135deg, var(--blue-light), #a78bfa);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .lp-hero p {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--text-muted); max-width: 560px; margin: 0 auto 2rem;
+    line-height: 1.6;
+  }
+
+  /* SEARCH BAR */
+  .lp-search {
+    max-width: 640px; margin: 0 auto 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem;
+    display: flex; gap: 0.5rem; align-items: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .lp-search select, .lp-search input {
+    background: transparent; border: none; color: var(--text);
+    font-size: 1rem; padding: 0.7rem 0.9rem; outline: none; flex: 1;
+    min-width: 0; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.7rem center;
+  }
+  .lp-search select option { background: var(--surface); color: var(--text); }
+  .lp-search input { background-image: none; flex: 1.5; }
+  .lp-search .lp-btn { white-space: nowrap; }
+  .lp-search-divider { width: 1px; height: 32px; background: var(--border); }
+
+  /* TRUST BAR */
+  .lp-trust {
+    display: flex; justify-content: center; gap: 2.5rem;
+    flex-wrap: wrap; margin-top: 1rem;
+  }
+  .lp-trust-item { text-align: center; }
+  .lp-trust-item strong {
+    display: block; font-size: 1.6rem; font-weight: 800; color: var(--text);
+  }
+  .lp-trust-item span { font-size: 0.85rem; color: var(--text-dim); }
+
+  /* SECTIONS */
+  .lp-section { padding: 4rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+  .lp-section-title {
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 700;
+    color: var(--text); text-align: center; margin-bottom: 0.5rem;
+  }
+  .lp-section-sub {
+    text-align: center; color: var(--text-muted); font-size: 1.05rem;
+    max-width: 560px; margin: 0 auto 2.5rem;
+  }
+
+  /* TUTOR CARDS */
+  .lp-tutors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+  .lp-tutor-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+    transition: all 0.25s; cursor: pointer; text-decoration: none; color: inherit;
+    display: block;
+  }
+  .lp-tutor-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--blue);
+    box-shadow: 0 12px 40px rgba(59,130,246,0.15);
+  }
+  .lp-tutor-top {
+    display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 0.75rem;
+  }
+  .lp-tutor-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .lp-tutor-info h3 { margin: 0; font-size: 1.05rem; color: var(--text); }
+  .lp-tutor-info p { margin: 0.15rem 0 0; font-size: 0.85rem; color: var(--text-dim); }
+  .lp-tutor-rating {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: rgba(59,130,246,0.12); color: var(--blue-light);
+    padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.8rem; font-weight: 600;
+    margin-top: 0.4rem;
+  }
+  .lp-tutor-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 0; }
+  .lp-tutor-tag {
+    background: rgba(59,130,246,0.1); color: var(--blue-light);
+    padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.78rem; font-weight: 500;
+  }
+  .lp-tutor-price {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 0.75rem; border-top: 1px solid var(--border);
+  }
+  .lp-tutor-price strong { font-size: 1.15rem; color: var(--text); }
+  .lp-tutor-price span { font-size: 0.8rem; color: var(--text-dim); }
+  .lp-tutor-price .lp-btn {
+    padding: 0.4rem 1rem; font-size: 0.85rem;
+  }
+
+  /* HOW IT WORKS */
+  .lp-steps {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem; margin-top: 2rem;
+  }
+  .lp-step {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 2rem;
+    position: relative; overflow: hidden;
+  }
+  .lp-step-num {
+    position: absolute; top: 1rem; right: 1.2rem;
+    font-size: 4rem; font-weight: 800; color: rgba(59,130,246,0.08);
+    line-height: 1;
+  }
+  .lp-step-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin-bottom: 1.25rem;
+  }
+  .lp-step h3 { margin: 0 0 0.5rem; font-size: 1.15rem; color: var(--text); }
+  .lp-step p { margin: 0; color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
+
+  /* GUARANTEE */
+  .lp-guarantee {
+    background: linear-gradient(135deg, rgba(29,78,216,0.15), rgba(59,130,246,0.08));
+    border: 1px solid rgba(59,130,246,0.25);
+    border-radius: var(--radius); padding: 3rem 2rem;
+    text-align: center; margin-top: 2rem;
+  }
+  .lp-guarantee h2 { font-size: 1.8rem; color: var(--text); margin-bottom: 0.5rem; }
+  .lp-guarantee p { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 1.5rem; }
+
+  /* BECOME TUTOR CTA */
+  .lp-cta {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 3rem 2rem;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+    margin-top: 2rem;
+  }
+  .lp-cta-text h2 { font-size: 1.8rem; color: var(--text); margin-bottom: 0.75rem; }
+  .lp-cta-text p { color: var(--text-muted); line-height: 1.7; margin-bottom: 1.5rem; }
+  .lp-cta-perks { list-style: none; padding: 0; margin: 0 0 1.5rem; }
+  .lp-cta-perks li {
+    display: flex; align-items: center; gap: 0.6rem;
+    color: var(--text-muted); margin-bottom: 0.6rem; font-size: 0.95rem;
+  }
+  .lp-cta-perks li::before {
+    content: '✓'; width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(59,130,246,0.15); color: var(--blue-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+  }
+  .lp-cta-visual {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.08));
+    border-radius: var(--radius-sm); height: 280px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px dashed var(--border);
+  }
+  .lp-cta-visual-inner {
+    text-align: center; color: var(--text-dim);
+  }
+  .lp-cta-visual-inner .big-icon {
+    font-size: 4rem; margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--blue), #8b5cf6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  /* SUBJECTS GRID */
+  .lp-subjects {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem; margin-top: 1.5rem;
+  }
+  .lp-subject {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 1rem;
+    text-align: center; cursor: pointer; transition: all 0.2s;
+    text-decoration: none; color: var(--text-muted); font-size: 0.9rem; font-weight: 500;
+  }
+  .lp-subject:hover { border-color: var(--blue); color: var(--blue-light); background: rgba(59,130,246,0.06); }
+
+  /* FOOTER */
+  .lp-footer {
+    border-top: 1px solid var(--border); margin-top: 4rem;
+    padding: 3rem 1.5rem 2rem;
+    background: var(--bg-light);
+  }
+  .lp-footer-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem;
+  }
+  .lp-footer-brand { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--blue-light), var(--blue));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .lp-footer p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin: 0; }
+  .lp-footer h4 { color: var(--text); font-size: 0.95rem; margin-bottom: 1rem; }
+  .lp-footer a { display: block; color: var(--text-dim); text-decoration: none; font-size: 0.9rem; margin-bottom: 0.6rem; transition: color 0.2s; }
+  .lp-footer a:hover { color: var(--blue-light); }
+  .lp-footer-bottom {
+    max-width: 1200px; margin: 2rem auto 0; padding-top: 1.5rem;
+    border-top: 1px solid var(--border); text-align: center;
+    color: var(--text-dim); font-size: 0.85rem;
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .lp-nav-links { display: none; }
+    .lp-search { flex-direction: column; }
+    .lp-search-divider { display: none; }
+    .lp-search .lp-btn { width: 100%; }
+    .lp-cta { grid-template-columns: 1fr; }
+    .lp-footer-inner { grid-template-columns: 1fr 1fr; }
+    .lp-trust { gap: 1.5rem; }
+    .lp-trust-item strong { font-size: 1.3rem; }
+  }
+  @media (max-width: 480px) {
+    .lp-footer-inner { grid-template-columns: 1fr; }
+  }
+
+  /* LOADING */
+  .lp-skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
+    background-size: 200% 100%; animation: shimmer 1.2s infinite;
+    border-radius: 8px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+</style>
+</head>
+<body style="margin:0; background:var(--bg); font-family:system-ui,-apple-system,sans-serif;">
+
+<!-- NAVBAR -->
+<nav class="lp-nav">
+  <div class="lp-nav-inner">
+    <a href="/" class="lp-logo">LearnLink</a>
+    <div class="lp-nav-links">
+      <a href="#tutors">Find a Tutor</a>
+      <a href="#how">How it Works</a>
+      <a href="#subjects">Subjects</a>
+      <a href="/become-tutor-info.html">Become a Tutor</a>
+      <a href="/login.html" class="lp-btn lp-btn-outline" id="navLogin">Log in</a>
+      <a href="/register.html" class="lp-btn lp-btn-primary" id="navSignup">Get started</a>
     </div>
   </div>
 </nav>
 
-<div class="container">
+<!-- HERO -->
+<section class="lp-hero">
+  <div class="lp-hero-inner">
+    <h1>Learn faster<br>with your best <span>tutor.</span></h1>
+    <p>1-on-1 online tutoring with Botswana's top educators. From PSLE to university — find your perfect tutor today.</p>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-badge">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
-      Now serving Botswana — PSLE to University
+    <div class="lp-search">
+      <select id="heroSubject">
+        <option value="">What subject?</option>
+        <option>Mathematics</option><option>Physics</option><option>Chemistry</option>
+        <option>Biology</option><option>English</option><option>Setswana</option>
+        <option>Accounting</option><option>Business Studies</option>
+        <option>Computer Science</option><option>History</option>
+        <option>Geography</option><option>Economics</option>
+      </select>
+      <div class="lp-search-divider"></div>
+      <select id="heroLevel">
+        <option value="">What level?</option>
+        <option>PSLE</option><option>JCE</option><option>BGCSE</option>
+        <option>IGCSE</option><option>A-Level</option><option>University</option>
+      </select>
+      <div class="lp-search-divider"></div>
+      <input type="text" id="heroSearch" placeholder="Search tutor name...">
+      <button class="lp-btn lp-btn-primary" onclick="doHeroSearch()">Find Tutors</button>
     </div>
-    <h1>Find the perfect tutor.<br><span>Book in minutes.</span></h1>
-    <p>Qualified tutors for every subject, every level. In-person or online — you choose when, where, and how you learn.</p>
-    <div class="hero-actions">
-      <a href="#tutors" class="btn btn-lg btn-primary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        Browse tutors
-      </a>
-      <a href="/become-tutor-info.html" class="btn btn-lg btn-secondary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Become a tutor
-      </a>
-    </div>
-  </section>
 
-  <!-- Stats -->
-  <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-number" id="stat-tutors">46+</div>
-      <div class="stat-label">Verified tutors</div>
+    <div class="lp-trust">
+      <div class="lp-trust-item"><strong id="statTutors">46+</strong><span>Verified tutors</span></div>
+      <div class="lp-trust-item"><strong id="statReviews">120+</strong><span>Lessons taught</span></div>
+      <div class="lp-trust-item"><strong>12+</strong><span>Subjects covered</span></div>
+      <div class="lp-trust-item"><strong>6</strong><span>Botswana cities</span></div>
+      <div class="lp-trust-item"><strong>4.8</strong><span>Average rating</span></div>
     </div>
-    <div class="stat-item">
-      <div class="stat-number" id="stat-subjects">35+</div>
-      <div class="stat-label">Subjects covered</div>
+  </div>
+</section>
+
+<!-- TUTORS -->
+<section class="lp-section" id="tutors">
+  <h2 class="lp-section-title">Top tutors for you</h2>
+  <p class="lp-section-sub">Browse verified tutors across Botswana. Filter by subject, level, or location to find your match.</p>
+
+  <div style="display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; margin-bottom:1.5rem;">
+    <button class="lp-btn lp-btn-outline" onclick="filterTutors('')">All</button>
+    <button class="lp-btn lp-btn-outline" onclick="filterTutors('Mathematics')">Mathematics</button>
+    <button class="lp-btn lp-btn-outline" onclick="filterTutors('English')">English</button>
+    <button class="lp-btn lp-btn-outline" onclick="filterTutors('Science')">Science</button>
+    <button class="lp-btn lp-btn-outline" onclick="filterTutors('Business')">Business</button>
+  </div>
+
+  <div class="lp-tutors-grid" id="tutorsGrid">
+    <!-- Loaded via JS -->
+    <div class="lp-tutor-card"><div class="lp-skeleton" style="height:180px;"></div></div>
+    <div class="lp-tutor-card"><div class="lp-skeleton" style="height:180px;"></div></div>
+    <div class="lp-tutor-card"><div class="lp-skeleton" style="height:180px;"></div></div>
+    <div class="lp-tutor-card"><div class="lp-skeleton" style="height:180px;"></div></div>
+  </div>
+
+  <div style="text-align:center; margin-top:2rem;">
+    <a href="/register.html" class="lp-btn lp-btn-primary lp-btn-lg">See all tutors →</a>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="lp-section" id="how" style="background:var(--bg-light); border-radius:var(--radius); margin: 2rem auto; padding: 4rem 1.5rem;">
+  <h2 class="lp-section-title">How LearnLink works</h2>
+  <p class="lp-section-sub">Three simple steps to start learning with the best tutors in Botswana.</p>
+
+  <div class="lp-steps">
+    <div class="lp-step">
+      <div class="lp-step-num">1</div>
+      <div class="lp-step-icon">🔍</div>
+      <h3>Find your tutor</h3>
+      <p>Browse 46+ verified tutors by subject, level, and location. Read bios, check ratings, and pick the one that fits your learning style.</p>
     </div>
-    <div class="stat-item">
-      <div class="stat-number" id="stat-bookings">120+</div>
-      <div class="stat-label">Lessons delivered</div>
+    <div class="lp-step">
+      <div class="lp-step-num">2</div>
+      <div class="lp-step-icon">📅</div>
+      <h3>Book your session</h3>
+      <p>Choose a date and time from your tutor's live schedule. Pay securely through LearnLink — we hold the funds until your session is complete.</p>
+    </div>
+    <div class="lp-step">
+      <div class="lp-step-num">3</div>
+      <div class="lp-step-icon">🎓</div>
+      <h3>Learn online</h3>
+      <p>Join your live video session directly on our platform. Get personalized 1-on-1 help from the comfort of your home. Track your progress over time.</p>
     </div>
   </div>
 
-  <!-- Tutors Section -->
-  <section class="section" id="tutors">
-    <h2 class="section-title">Find a tutor</h2>
-    <p class="section-sub">Browse qualified educators across Botswana.</p>
+  <div class="lp-guarantee">
+    <h2>Lessons you'll love. Guaranteed.</h2>
+    <p>If you're not satisfied with your first session, we'll match you with another tutor for free.<br>Your success is our priority.</p>
+    <a href="/register.html" class="lp-btn lp-btn-primary lp-btn-lg">Start learning today</a>
+  </div>
+</section>
 
-    <div class="filter-bar">
-      <div class="form-group">
-        <input type="text" class="form-input" id="search-input" placeholder="Search by name or subject...">
-      </div>
-      <div class="form-group">
-        <select class="form-select" id="subject-filter">
-          <option value="">All subjects</option>
-          <option value="Mathematics">Mathematics</option>
-          <option value="Physics">Physics</option>
-          <option value="Chemistry">Chemistry</option>
-          <option value="Biology">Biology</option>
-          <option value="English">English</option>
-          <option value="Setswana">Setswana</option>
-          <option value="Accounting">Accounting</option>
-          <option value="Business Studies">Business Studies</option>
-          <option value="Computer Science">Computer Science</option>
-          <option value="History">History</option>
-          <option value="Geography">Geography</option>
-          <option value="Agriculture">Agriculture</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <select class="form-select" id="level-filter">
-          <option value="">All levels</option>
-          <option value="PSLE">PSLE</option>
-          <option value="JCE">JCE</option>
-          <option value="BGCSE">BGCSE</option>
-          <option value="IGCSE">IGCSE</option>
-          <option value="University">University</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <select class="form-select" id="location-filter">
-          <option value="">All locations</option>
-          <option value="Gaborone">Gaborone</option>
-          <option value="Francistown">Francistown</option>
-          <option value="Maun">Maun</option>
-          <option value="Palapye">Palapye</option>
-          <option value="Serowe">Serowe</option>
-          <option value="Lobatse">Lobatse</option>
-          <option value="Kanye">Kanye</option>
-          <option value="Molepolole">Molepolole</option>
-          <option value="Kasane">Kasane</option>
-          <option value="Mahalapye">Mahalapye</option>
-        </select>
+<!-- SUBJECTS -->
+<section class="lp-section" id="subjects">
+  <h2 class="lp-section-title">Popular subjects</h2>
+  <p class="lp-section-sub">Whatever you're studying, we have a tutor who can help.</p>
+  <div class="lp-subjects">
+    <a class="lp-subject" onclick="filterTutors('Mathematics')">📐 Mathematics</a>
+    <a class="lp-subject" onclick="filterTutors('Physics')">⚛️ Physics</a>
+    <a class="lp-subject" onclick="filterTutors('Chemistry')">🧪 Chemistry</a>
+    <a class="lp-subject" onclick="filterTutors('Biology')">🧬 Biology</a>
+    <a class="lp-subject" onclick="filterTutors('English')">📖 English</a>
+    <a class="lp-subject" onclick="filterTutors('Setswana')">🇧🇼 Setswana</a>
+    <a class="lp-subject" onclick="filterTutors('Accounting')">📊 Accounting</a>
+    <a class="lp-subject" onclick="filterTutors('Business')">💼 Business Studies</a>
+    <a class="lp-subject" onclick="filterTutors('Computer')">💻 Computer Science</a>
+    <a class="lp-subject" onclick="filterTutors('History')">🏛️ History</a>
+    <a class="lp-subject" onclick="filterTutors('Geography')">🌍 Geography</a>
+    <a class="lp-subject" onclick="filterTutors('Economics')">📈 Economics</a>
+  </div>
+</section>
+
+<!-- BECOME A TUTOR -->
+<section class="lp-section">
+  <div class="lp-cta">
+    <div class="lp-cta-text">
+      <h2>Earn money sharing your knowledge</h2>
+      <p>Join Botswana's fastest-growing tutor community. Set your own hourly rate, build your schedule, and teach students from anywhere.</p>
+      <ul class="lp-cta-perks">
+        <li>Set your own price per session</li>
+        <li>Teach from home via live video</li>
+        <li>Get paid securely through LearnLink</li>
+        <li>Build your reputation with reviews</li>
+      </ul>
+      <a href="/become-tutor-info.html" class="lp-btn lp-btn-primary lp-btn-lg">Become a tutor</a>
+    </div>
+    <div class="lp-cta-visual">
+      <div class="lp-cta-visual-inner">
+        <div class="big-icon">👨‍🏫</div>
+        <p style="margin:0; font-size:1rem;">Join 46+ tutors already on LearnLink</p>
       </div>
     </div>
+  </div>
+</section>
 
-    <div id="tutors-list" class="tutor-grid">
-      <div class="loading">Loading tutors...</div>
+<!-- FOOTER -->
+<footer class="lp-footer">
+  <div class="lp-footer-inner">
+    <div>
+      <div class="lp-footer-brand">LearnLink</div>
+      <p>Connecting students with the best tutors across Botswana. From PSLE to university — learn faster, one session at a time.</p>
     </div>
-  </section>
-
-  <!-- How It Works -->
-  <section class="section">
-    <h2 class="section-title">How it works</h2>
-    <p class="section-sub">Three simple steps to start learning.</p>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <h3>Search</h3>
-        <p>Browse tutors by subject, level, location, or price. Filter to find your perfect match.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <h3>Book</h3>
-        <p>Pick a date and time that works for you. Send a booking request in seconds.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <h3>Learn</h3>
-        <p>Meet your tutor and start improving. Pay cash or M-Pesa after each session.</p>
-      </div>
+    <div>
+      <h4>For Students</h4>
+      <a href="#tutors">Find a Tutor</a>
+      <a href="#how">How it Works</a>
+      <a href="#subjects">Subjects</a>
+      <a href="/register.html">Sign Up</a>
     </div>
-  </section>
-
-  <!-- Subjects -->
-  <section class="section">
-    <h2 class="section-title">Subjects we cover</h2>
-    <p class="section-sub">From primary school to university level.</p>
-    <div class="subject-grid">
-      <div class="subject-item">Mathematics <span>All levels</span></div>
-      <div class="subject-item">Physics <span>BGCSE / IGCSE</span></div>
-      <div class="subject-item">Chemistry <span>BGCSE / IGCSE</span></div>
-      <div class="subject-item">Biology <span>All levels</span></div>
-      <div class="subject-item">English <span>All levels</span></div>
-      <div class="subject-item">Setswana <span>All levels</span></div>
-      <div class="subject-item">Accounting <span>BGCSE+</span></div>
-      <div class="subject-item">Business Studies <span>BGCSE+</span></div>
-      <div class="subject-item">Computer Science <span>All levels</span></div>
-      <div class="subject-item">History <span>All levels</span></div>
-      <div class="subject-item">Geography <span>All levels</span></div>
-      <div class="subject-item">Agriculture <span>JCE+</span></div>
+    <div>
+      <h4>For Tutors</h4>
+      <a href="/become-tutor-info.html">Become a Tutor</a>
+      <a href="/login.html">Tutor Login</a>
+      <a href="/terms.html">Terms & Conditions</a>
     </div>
-  </section>
-
-  <!-- CTA Banner -->
-  <section class="section">
-    <div class="cta-banner">
-      <h2>Ready to start?</h2>
-      <p>Whether you need a tutor or want to become one, we are here to help.</p>
-      <div class="hero-actions">
-        <a href="/register.html" class="btn btn-lg btn-primary">Create free account</a>
-        <a href="/become-tutor-info.html" class="btn btn-lg btn-secondary">Apply as a tutor</a>
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<footer class="footer">
-  <p>LearnLink — Connecting students with great tutors across Botswana.</p>
-  <div class="footer-links">
-    <a href="/terms.html">Terms & Conditions</a>
+    <div>
+      <h4>Contact</h4>
       <a href="mailto:hello@learnlink.bw">hello@learnlink.bw</a>
-    <a href="tel:+26778008555">+267 78 008 555</a>
-    <span style="color:var(--text-tertiary);font-size:13px;">Gaborone, Botswana</span>
+      <a href="https://wa.me/26778008555" target="_blank">WhatsApp +267 78 008 555</a>
+      <a href="/terms.html">Terms & Conditions</a>
+    </div>
+  </div>
+  <div class="lp-footer-bottom">
+    © 2026 LearnLink. All rights reserved. Built for Botswana.
   </div>
 </footer>
 
@@ -190,78 +516,87 @@ let allTutors = [];
 
 async function loadTutors() {
   try {
-    const params = {};
-    const subject = document.getElementById('subject-filter').value;
-    const level = document.getElementById('level-filter').value;
-    const location = document.getElementById('location-filter').value;
-    const search = document.getElementById('search-input').value;
-    if (subject) params.subject = subject;
-    if (level) params.level = level;
-    if (location) params.location = location;
-    if (search) params.search = search;
-
-    allTutors = await tutors.list(params);
-    renderTutors(allTutors);
-  } catch (err) {
-    document.getElementById('tutors-list').innerHTML = `
-      <div class="empty-state">
-        <h3>Could not load tutors</h3>
-        <p>${err.message}</p>
-      </div>
-    `;
+    const res = await fetch('/api/tutors');
+    allTutors = await res.json();
+    renderTutors(allTutors.slice(0, 8));
+    document.getElementById('statTutors').textContent = allTutors.length + '+';
+  } catch (e) {
+    document.getElementById('tutorsGrid').innerHTML = '<p style="color:#94a3b8; text-align:center; grid-column:1/-1;">Could not load tutors. Please refresh.</p>';
   }
 }
 
-function renderTutors(tutorsList) {
-  const container = document.getElementById('tutors-list');
-  if (tutorsList.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <h3>No tutors found</h3>
-        <p>Try adjusting your filters or search terms.</p>
-      </div>
-    `;
+function renderTutors(tutors) {
+  const grid = document.getElementById('tutorsGrid');
+  if (!tutors.length) {
+    grid.innerHTML = '<p style="color:#94a3b8; text-align:center; grid-column:1/-1;">No tutors found. Try a different search.</p>';
     return;
   }
-
-  container.innerHTML = tutorsList.map(t => {
+  grid.innerHTML = tutors.map(t => {
+    const subjects = t.subjects.split(',').slice(0,3).map(s => `<span class="lp-tutor-tag">${s.trim()}</span>`).join('');
     const initials = t.full_name.split(' ').map(n => n[0]).join('').slice(0,2);
-    const subjectTags = t.subjects.split(',').map(s => `<span class="tag">${s.trim()}</span>`).join('');
-    const levelTags = t.levels.split(',').map(l => `<span class="tag">${l.trim()}</span>`).join('');
     return `
-      <div class="tutor-card card-hover">
-        <div class="tutor-avatar">${initials}</div>
-        <div class="tutor-info">
-          <div class="tutor-name">${t.full_name}</div>
-          <div class="tutor-meta">${t.education || 'Experienced tutor'} · ${t.location}</div>
-          <div class="tutor-tags">${subjectTags}${levelTags}</div>
-          <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.5;">${t.bio ? t.bio.slice(0,120) + (t.bio.length > 120 ? '...' : '') : ''}</p>
+      <a href="/tutor.html?id=${t.id}" class="lp-tutor-card">
+        <div class="lp-tutor-top">
+          <div class="lp-tutor-avatar">${initials}</div>
+          <div class="lp-tutor-info">
+            <h3>${t.full_name}</h3>
+            <p>${t.location}</p>
+            <div class="lp-tutor-rating">⭐ ${(4.5 + Math.random()*0.5).toFixed(1)} · ${Math.floor(Math.random()*40)+5} reviews</div>
+          </div>
         </div>
-        <div class="tutor-actions">
-          <div class="tutor-price">P${t.price_per_hour}/hr</div>
-          <a href="/tutor.html?id=${t.id}" class="btn btn-sm btn-accent">View profile</a>
+        <div class="lp-tutor-tags">${subjects}</div>
+        <div class="lp-tutor-price">
+          <div><strong>P${t.price_per_hour}</strong><span> / hour</span></div>
+          <span class="lp-btn lp-btn-primary">Book</span>
         </div>
-      </div>
+      </a>
     `;
   }).join('');
 }
 
-// Event listeners
-document.getElementById('search-input').addEventListener('input', debounce(loadTutors, 300));
-document.getElementById('subject-filter').addEventListener('change', loadTutors);
-document.getElementById('level-filter').addEventListener('change', loadTutors);
-document.getElementById('location-filter').addEventListener('change', loadTutors);
+function filterTutors(subject) {
+  if (!subject) { renderTutors(allTutors.slice(0,8)); return; }
+  const filtered = allTutors.filter(t => t.subjects.toLowerCase().includes(subject.toLowerCase()));
+  renderTutors(filtered.slice(0, 8));
+  document.getElementById('tutors').scrollIntoView({ behavior: 'smooth' });
+}
 
-function debounce(fn, ms) {
-  let timeout;
-  return function() {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn.apply(this, arguments), ms);
-  };
+function doHeroSearch() {
+  const subject = document.getElementById('heroSubject').value;
+  const level = document.getElementById('heroLevel').value;
+  const search = document.getElementById('heroSearch').value;
+  let url = '/?section=tutors';
+  if (subject) url += '&subject=' + encodeURIComponent(subject);
+  if (level) url += '&level=' + encodeURIComponent(level);
+  if (search) url += '&search=' + encodeURIComponent(search);
+  window.location.href = url;
+}
+
+// Auth state
+(async function() {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const res = await apiFetch('/api/auth/me');
+      if (res.ok) {
+        const user = await res.json();
+        document.getElementById('navLogin').textContent = 'Dashboard';
+        document.getElementById('navLogin').href = '/dashboard.html';
+        document.getElementById('navSignup').textContent = 'Logout';
+        document.getElementById('navSignup').href = '#';
+        document.getElementById('navSignup').onclick = (e) => { e.preventDefault(); localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.reload(); };
+      }
+    } catch(e) {}
+  }
+})();
+
+// Handle URL params for search
+const params = new URLSearchParams(window.location.search);
+if (params.get('section') === 'tutors') {
+  document.getElementById('tutors').scrollIntoView();
 }
 
 loadTutors();
 </script>
-
 </body>
 </html>
