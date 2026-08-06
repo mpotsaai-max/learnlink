@@ -32,7 +32,7 @@
 <nav class="navbar">
   <div class="container nav-content">
     <a href="/" class="logo">LearnLink</a>
-    <div class="nav-links">
+    <div class="nav-links" id="nav-links">
       <a href="/">Home</a>
       <a href="/register.html">Sign up</a>
     </div>
@@ -71,26 +71,20 @@
 
 <script src="/js/app.js"></script>
 <script>
-// CORRECT
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault(); // ← THIS IS THE FIX
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
+  const alertBox = document.getElementById('alertBox');
+
   try {
     const data = await auth.login({email, password});
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
     window.location.href = '/';
   } catch (err) {
-    alert(err.message);
-  }
-});
-      alertBox.textContent = data.error || 'Login failed';
-      alertBox.style.display = 'block';
-    }
-  } catch (err) {
     alertBox.className = 'alert alert-error';
-    alertBox.textContent = 'Network error. Please try again.';
+    alertBox.textContent = err.message || 'Login failed. Please check your credentials.';
     alertBox.style.display = 'block';
   }
 });
