@@ -6,333 +6,507 @@
 <title>Tutor Profile — LearnLink</title>
 <link rel="stylesheet" href="/css/style.css">
 <style>
-.slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
-.slot-btn {
-  padding: 10px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border);
-  background: var(--surface-raised); color: var(--text-primary); font-size: 13px;
-  font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s;
-}
-.slot-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
-.slot-btn.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
-.slot-btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--surface); color: var(--text-tertiary); }
-.package-card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 20px; margin-bottom: 12px; cursor: pointer; transition: all 0.15s;
-}
-.package-card:hover { border-color: var(--accent); }
-.package-card.selected { border-color: var(--accent); background: var(--accent-soft); }
-.package-card h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-.package-card .price { font-size: 20px; font-weight: 600; color: var(--accent); margin: 8px 0; }
-.package-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
-.booking-type-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-.booking-type-tab {
-  flex: 1; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
-  background: var(--surface); color: var(--text-secondary); font-size: 14px; font-weight: 500;
-  cursor: pointer; text-align: center; transition: all 0.15s;
-}
-.booking-type-tab:hover { border-color: var(--border-light); color: var(--text-primary); }
-.booking-type-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .payment-step { display: none; }
+  .payment-step.active { display: block; animation: fadeIn 0.3s ease; }
+  .booking-step { display: none; }
+  .booking-step.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .payment-box {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+  }
+  .payment-method {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .payment-method:hover, .payment-method.selected {
+    border-color: #3b82f6;
+    background: #172554;
+  }
+  .payment-method input { width: auto; margin: 0; }
+  .payment-method strong { color: #e2e8f0; display: block; }
+  .payment-method small { color: #94a3b8; }
+
+  .warning-box {
+    background: #451a1a;
+    border: 1px solid #b91c1c;
+    border-left: 4px solid #ef4444;
+    color: #fecaca;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+  .warning-box strong { color: #f87171; }
+
+  .info-box {
+    background: #0c2e4e;
+    border: 1px solid #1d4ed8;
+    border-left: 4px solid #3b82f6;
+    color: #bfdbfe;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .refund-box {
+    background: #064e3b;
+    border: 1px solid #059669;
+    border-left: 4px solid #10b981;
+    color: #a7f3d0;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .whatsapp-box {
+    background: #064e3b;
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    margin: 1rem 0;
+  }
+  .whatsapp-box a {
+    color: #34d399;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+  }
+  .checkbox-row input { width: auto; margin-top: 2px; }
+
+  .step-indicator {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .step-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #334155;
+  }
+  .step-dot.active { background: #3b82f6; }
+
+  .price-tag {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #3b82f6;
+  }
+  .price-tag span { font-size: 0.9rem; color: #94a3b8; font-weight: 400; }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid #475569;
+    color: #cbd5e1;
+  }
+  .btn-outline:hover { background: #334155; }
 </style>
 </head>
 <body>
-
 <nav class="navbar">
-  <div class="navbar-inner">
-    <a href="/" class="nav-brand">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      LearnLink
-    </a>
-    <div class="nav-links" id="nav-links"></div>
+  <div class="container nav-content">
+    <a href="/" class="logo">LearnLink</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="#" id="logoutBtn">Logout</a>
+    </div>
   </div>
 </nav>
 
-<div class="container">
-  <div class="section">
-    <div id="profile-content">
-      <div class="loading">Loading tutor profile...</div>
-    </div>
-  </div>
+<div class="container" style="padding-top: 2rem;">
+  <div id="tutorProfile"></div>
 </div>
+
+<footer class="footer" style="margin-top: 3rem; padding: 2rem 0; border-top: 1px solid #334155; text-align: center; color: #94a3b8; font-size: 0.9rem;">
+  <div class="container">
+    <p>LearnLink — Connecting students with great tutors across Botswana.</p>
+    <p style="margin-top: 0.5rem;">
+      <a href="/" style="color: #94a3b8; margin: 0 0.5rem;">Home</a>
+      <a href="/terms.html" style="color: #94a3b8; margin: 0 0.5rem;">Terms & Conditions</a>
+      <a href="mailto:hello@learnlink.bw" style="color: #94a3b8; margin: 0 0.5rem;">hello@learnlink.bw</a>
+    </p>
+  </div>
+</footer>
 
 <script src="/js/app.js"></script>
 <script>
 const tutorId = new URLSearchParams(window.location.search).get('id');
-if (!tutorId) window.location.href = '/';
-
-let currentTutor = null;
-let selectedDate = null;
-let selectedTime = null;
-let selectedPackageId = null;
-let bookingType = 'session';
+let tutorData = null;
+let selectedPackage = null;
 
 async function loadTutor() {
+  if (!tutorId) return document.getElementById('tutorProfile').innerHTML = '<p>Tutor not found.</p>';
   try {
-    const t = await tutors.get(tutorId);
-    currentTutor = t;
-    const initials = t.full_name.split(' ').map(n => n[0]).join('').slice(0,2);
-    const subjects = t.subjects.split(',').map(s => `<span class="tag">${s.trim()}</span>`).join('');
-    const levels = t.levels.split(',').map(l => `<span class="tag">${l.trim()}</span>`).join('');
-    const isLoggedIn = !!getToken();
-    const tutorShare = Math.round(t.price_per_hour * 0.85);
+    const res = await fetch(`/api/tutors/${tutorId}`);
+    if (!res.ok) throw new Error('Not found');
+    tutorData = await res.json();
+    renderTutor(tutorData);
+  } catch (e) {
+    document.getElementById('tutorProfile').innerHTML = '<p>Tutor not found.</p>';
+  }
+}
 
-    // Build packages HTML
-    let packagesHtml = '';
-    if (t.packages && t.packages.length > 0) {
-      packagesHtml = `
-        <div class="profile-section">
-          <h2>Monthly Packages</h2>
-          <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px;">
-            Subscribe monthly and save. All sessions are held online via video call.
-          </p>
-          <div id="packages-list">
-            ${t.packages.map(pkg => `
-              <div class="package-card" data-id="${pkg.id}" onclick="selectPackage(${pkg.id})">
-                <h4>${pkg.name}</h4>
-                <div class="price">P${pkg.price_per_month}<span style="font-size:14px;font-weight:400;color:var(--text-tertiary);">/month</span></div>
-                <p>${pkg.description || ''}</p>
-                <p style="margin-top:6px;"><span class="tag">${pkg.sessions_included} sessions</span> <span class="tag">${pkg.subjects}</span></p>
-              </div>
-            `).join('')}
+function renderTutor(t) {
+  const subjects = t.subjects.split(',').map(s => `<span class="tag">${s.trim()}</span>`).join('');
+  const levels = t.levels.split(',').map(l => `<span class="tag tag-outline">${l.trim()}</span>`).join('');
+  const commissionRate = 0.15;
+  const tutorReceives = Math.round(t.price_per_hour * (1 - commissionRate));
+
+  document.getElementById('tutorProfile').innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
+      <div class="card">
+        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+          <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; color: white;">
+            ${t.full_name.charAt(0)}
+          </div>
+          <div>
+            <h1 style="margin: 0;">${t.full_name}</h1>
+            <p style="margin: 0.25rem 0 0; color: #94a3b8;">${t.location} · ${t.education || 'Verified Tutor'}</p>
           </div>
         </div>
-      `;
-    }
-
-    // Build booking panel
-    let bookingPanel = '';
-    if (isLoggedIn) {
-      bookingPanel = `
-        <div class="booking-panel">
-          <h3>Book with ${t.full_name.split(' ')[0]}</h3>
-
-          <div class="booking-type-tabs">
-            <div class="booking-type-tab active" onclick="setBookingType('session')">Single Session</div>
-            <div class="booking-type-tab" onclick="setBookingType('package')">Monthly Package</div>
-          </div>
-
-          <div id="session-booking">
-            <div class="price">P${t.price_per_hour} <span style="font-size:14px;font-weight:400;color:var(--text-tertiary);">per hour</span></div>
-            <div style="background:var(--accent-soft); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:16px;">
-              <p style="font-size:12px; color:var(--accent); line-height:1.5; margin:0;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:4px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                Secure booking · Online video session · Verified tutor
-              </p>
-            </div>
-            <form id="booking-form">
-              <div class="form-group">
-                <label class="form-label">Subject</label>
-                <select class="form-select" id="book-subject" required>
-                  ${t.subjects.split(',').map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('')}
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Pick a date</label>
-                <input type="date" class="form-input" id="book-date" required min="${new Date().toISOString().split('T')[0]}">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Available time slots</label>
-                <div id="slots-container" style="color:var(--text-tertiary);font-size:13px;">Select a date to see available slots</div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Notes (optional)</label>
-                <textarea class="form-textarea" id="book-notes" placeholder="What would you like to focus on?"></textarea>
-              </div>
-              <button type="submit" class="btn btn-accent" style="width:100%;" id="book-btn" disabled>Send booking request</button>
-            </form>
-          </div>
-
-          <div id="package-booking" style="display:none;">
-            <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px;">Select a monthly package above, then click subscribe.</p>
-            <div id="package-selected-info" style="display:none; background:var(--surface-raised); border-radius:var(--radius-sm); padding:14px; margin-bottom:16px;">
-              <p style="font-size:14px; color:var(--text-primary); margin:0;"><strong id="sel-pkg-name"></strong></p>
-              <p style="font-size:13px; color:var(--text-secondary); margin:4px 0 0;"><span id="sel-pkg-price"></span> — <span id="sel-pkg-sessions"></span> sessions</p>
-            </div>
-            <button class="btn btn-accent" style="width:100%;" id="subscribe-btn" disabled onclick="subscribePackage()">Subscribe to package</button>
-          </div>
-
-          <div class="alert alert-success" id="book-alert" style="margin-top:12px;"></div>
+        <p style="color: #cbd5e1; line-height: 1.7;">${t.bio}</p>
+        <div style="margin-top: 1rem;">${subjects}</div>
+        <div style="margin-top: 0.5rem;">${levels}</div>
+        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #334155;">
+          <div class="price-tag">P${t.price_per_hour} <span>/ hour</span></div>
+          <p style="color: #64748b; font-size: 0.85rem; margin-top: 0.25rem;">Secure booking · Online video session · Verified tutor</p>
         </div>
-      `;
-    } else {
-      bookingPanel = `
-        <div class="booking-panel">
-          <h3>Book a session</h3>
-          <div class="price">P${t.price_per_hour} <span style="font-size:14px;font-weight:400;color:var(--text-tertiary);">per hour</span></div>
-          <div style="background:var(--accent-soft); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:12px;">
-            <p style="font-size:12px; color:var(--accent); line-height:1.5; margin:0;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:4px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-              Secure booking · Online video session · Verified tutor
-            </p>
-          </div>
-          <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">Log in to book a session or subscribe to a monthly package.</p>
-          <a href="/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}" class="btn btn-accent" style="width:100%;">Log in to book</a>
-        </div>
-      `;
-    }
-
-    document.getElementById('profile-content').innerHTML = `
-      <div class="grid-2" style="align-items:start;">
-        <div>
-          <div class="profile-header">
-            <div class="profile-avatar">${initials}</div>
-            <div class="profile-info">
-              <h1>${t.full_name}</h1>
-              <div class="meta">${t.education || 'Experienced tutor'} · ${t.location}</div>
-              <div class="profile-price">P${t.price_per_hour} <span style="font-size:16px;font-weight:400;color:var(--text-tertiary);">per session (1 hour)</span></div>
-              <div class="tutor-tags" style="margin-top:12px;">${subjects}${levels}</div>
-            </div>
-          </div>
-          <div class="profile-section">
-            <h2>About</h2>
-            <p>${t.bio || 'No bio provided yet.'}</p>
-          </div>
-          <div class="profile-section">
-            <h2>Education</h2>
-            <p>${t.education || 'Not specified'}</p>
-          </div>
-          ${packagesHtml}
-        </div>
-        <div>${bookingPanel}</div>
       </div>
-    `;
 
-    // Attach event listeners
-    const dateInput = document.getElementById('book-date');
-    if (dateInput) {
-      dateInput.addEventListener('change', async (e) => {
-        selectedDate = e.target.value;
-        selectedTime = null;
-        document.getElementById('book-btn').disabled = true;
-        document.getElementById('book-btn').textContent = 'Send booking request';
-        await loadSlots(tutorId, selectedDate);
-      });
-    }
+      <div class="card">
+        <h2 style="margin-bottom: 1rem;">Book a Session</h2>
 
-    const form = document.getElementById('booking-form');
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('book-btn');
-        const alert = document.getElementById('book-alert');
-        alert.classList.remove('show', 'alert-error');
-        alert.classList.add('alert-success');
-        btn.disabled = true;
-        btn.textContent = 'Sending...';
+        <!-- Tabs -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem;">
+          <button id="tabSession" class="btn btn-primary" style="flex:1;" onclick="switchTab('session')">Single Session</button>
+          <button id="tabPackage" class="btn btn-outline" style="flex:1;" onclick="switchTab('package')">Monthly Package</button>
+        </div>
 
-        try {
-          await bookings.create({
-            tutor_id: parseInt(tutorId),
-            booking_type: 'session',
-            subject: document.getElementById('book-subject').value,
-            session_date: selectedDate,
-            session_time: selectedTime,
-            notes: document.getElementById('book-notes').value
-          });
-          alert.textContent = 'Booking request sent! The tutor will confirm and you will receive a video call link.';
-          alert.classList.add('show');
-          btn.textContent = 'Request sent';
-          form.reset();
-          document.getElementById('slots-container').innerHTML = 'Select a date to see available slots';
-        } catch (err) {
-          alert.textContent = err.message;
-          alert.classList.remove('alert-success');
-          alert.classList.add('alert-error');
-          alert.classList.add('show');
-          btn.disabled = false;
-          btn.textContent = 'Send booking request';
-        }
-      });
-    }
-  } catch (err) {
-    document.getElementById('profile-content').innerHTML = `
-      <div class="empty-state"><h3>Tutor not found</h3><p>${err.message}</p><a href="/" class="btn btn-primary" style="margin-top:16px;">Back to home</a></div>
-    `;
+        <!-- SINGLE SESSION FLOW -->
+        <div id="sessionFlow">
+          <div class="step-indicator">
+            <div class="step-dot active" id="dot1"></div>
+            <div class="step-dot" id="dot2"></div>
+          </div>
+
+          <!-- STEP 1: Session Details -->
+          <div id="step1" class="booking-step active">
+            <div class="form-group">
+              <label>Subject</label>
+              <select id="subjectSelect" class="form-control">
+                <option value="">Select subject</option>
+                ${t.subjects.split(',').map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Level</label>
+              <select id="levelSelect" class="form-control">
+                <option value="">Select level</option>
+                ${t.levels.split(',').map(l => `<option value="${l.trim()}">${l.trim()}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="sessionDate" class="form-control" min="${new Date().toISOString().split('T')[0]}">
+            </div>
+            <div class="form-group">
+              <label>Available Time Slots</label>
+              <select id="sessionTime" class="form-control" disabled>
+                <option>Pick a date first</option>
+              </select>
+              <small id="slotMsg" style="color: #64748b;"></small>
+            </div>
+            <div class="form-group">
+              <label>Notes for tutor (optional)</label>
+              <textarea id="sessionNotes" class="form-control" rows="2" placeholder="What topic? Any special requests?"></textarea>
+            </div>
+            <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+              <button class="btn btn-primary" style="flex:1;" onclick="goToPayment()">Next: Payment →</button>
+            </div>
+          </div>
+
+          <!-- STEP 2: Payment -->
+          <div id="step2" class="booking-step">
+            <div class="warning-box">
+              <strong>⚠️ Do NOT pay the tutor directly.</strong><br>
+              For your security, all payments must go through LearnLink. We hold the funds and pay the tutor after the session is completed. Never send money to a tutor's personal number.
+            </div>
+
+            <div class="payment-box">
+              <h3 style="margin-bottom: 0.5rem;">Booking Summary</h3>
+              <p style="color: #94a3b8; margin: 0;">
+                Tutor: <strong style="color: #e2e8f0;">${t.full_name}</strong><br>
+                Subject: <strong style="color: #e2e8f0;" id="paySubject"></strong><br>
+                Date: <strong style="color: #e2e8f0;" id="payDate"></strong><br>
+                Time: <strong style="color: #e2e8f0;" id="payTime"></strong>
+              </p>
+              <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #334155;">
+                <div class="price-tag" id="payAmount">P${t.price_per_hour} <span>/ session</span></div>
+                <p style="color: #64748b; font-size: 0.85rem; margin-top: 0.25rem;">You pay this amount to LearnLink. Tutor receives P${tutorReceives} after 15% platform fee.</p>
+              </div>
+            </div>
+
+            <h3 style="margin: 1.5rem 0 0.75rem;">How to Pay</h3>
+            <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 1rem;">Choose one method and send the exact amount to the number below.</p>
+
+            <div class="payment-method selected" onclick="selectMethod(this, 'OrangeMoney')">
+              <input type="radio" name="payMethod" value="OrangeMoney" checked>
+              <div>
+                <strong>OrangeMoney</strong>
+                <small>Send to: <strong style="color: #e2e8f0;">+267 78 008 555</strong></small>
+              </div>
+            </div>
+            <div class="payment-method" onclick="selectMethod(this, 'MyZaka')">
+              <input type="radio" name="payMethod" value="MyZaka">
+              <div>
+                <strong>MyZaka (Mascom)</strong>
+                <small>Send to: <strong style="color: #e2e8f0;">+267 78 008 555</strong></small>
+              </div>
+            </div>
+            <div class="payment-method" onclick="selectMethod(this, 'Smega')">
+              <input type="radio" name="payMethod" value="Smega">
+              <div>
+                <strong>Smega</strong>
+                <small>Send to: <strong style="color: #e2e8f0;">+267 78 008 555</strong></small>
+              </div>
+            </div>
+
+            <div class="whatsapp-box">
+              <p style="margin: 0 0 0.5rem; color: #a7f3d0;">📱 After paying, send your payment screenshot to:</p>
+              <a href="https://wa.me/26778008555" target="_blank">WhatsApp +267 78 008 555</a>
+              <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #6ee7b7;">Include your name and the tutor's name in the message for faster processing.</p>
+            </div>
+
+            <div class="refund-box">
+              <strong>💰 Refund Guarantee</strong><br>
+              If the tutor is unavailable or cancels for any reason, you will receive a <strong>full refund</strong> within 24 hours. Your money is safe with LearnLink.
+            </div>
+
+            <div class="checkbox-row">
+              <input type="checkbox" id="paymentConfirm">
+              <label for="paymentConfirm">I confirm that I have made payment using the selected method and sent the proof/screenshot to the WhatsApp number above.</label>
+            </div>
+
+            <div id="payError" style="color: #f87171; font-size: 0.9rem; margin-bottom: 0.75rem; display: none;">
+              Please confirm payment above to continue.
+            </div>
+
+            <div style="display: flex; gap: 0.75rem;">
+              <button class="btn btn-outline" style="flex:1;" onclick="goBack()">← Back</button>
+              <button class="btn btn-primary" style="flex:2;" onclick="submitBooking()">Submit Booking Request</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MONTHLY PACKAGE FLOW -->
+        <div id="packageFlow" style="display:none;">
+          ${t.packages && t.packages.length ? t.packages.map(pkg => `
+            <div class="card" style="margin-bottom: 1rem; border: 1px solid #334155;">
+              <h3 style="margin-bottom: 0.5rem;">${pkg.name}</h3>
+              <p style="color: #94a3b8; font-size: 0.9rem;">${pkg.description || ''}</p>
+              <p style="color: #94a3b8; font-size: 0.9rem;">Subjects: ${pkg.subjects} · Levels: ${pkg.levels}</p>
+              <div style="margin: 0.75rem 0;">
+                <span class="price-tag">P${pkg.price_per_month} <span>/ month</span></span>
+                <span style="color: #64748b; font-size: 0.85rem;"> (${pkg.sessions_included} sessions)</span>
+              </div>
+              <button class="btn btn-primary" onclick="subscribePackage(${pkg.id}, ${pkg.price_per_month}, '${pkg.name}')">Subscribe & Pay</button>
+            </div>
+          `).join('') : '<p style="color: #64748b;">No monthly packages available from this tutor yet.</p>'}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Date change listener
+  document.getElementById('sessionDate').addEventListener('change', loadSlots);
+}
+
+function switchTab(tab) {
+  const sFlow = document.getElementById('sessionFlow');
+  const pFlow = document.getElementById('packageFlow');
+  const tSession = document.getElementById('tabSession');
+  const tPackage = document.getElementById('tabPackage');
+  if (tab === 'session') {
+    sFlow.style.display = 'block';
+    pFlow.style.display = 'none';
+    tSession.className = 'btn btn-primary'; tSession.style.flex = '1';
+    tPackage.className = 'btn btn-outline'; tPackage.style.flex = '1';
+  } else {
+    sFlow.style.display = 'none';
+    pFlow.style.display = 'block';
+    tSession.className = 'btn btn-outline'; tSession.style.flex = '1';
+    tPackage.className = 'btn btn-primary'; tPackage.style.flex = '1';
   }
 }
 
-async function loadSlots(tutorId, date) {
-  const container = document.getElementById('slots-container');
-  container.innerHTML = '<div style="font-size:13px;color:var(--text-tertiary);">Loading slots...</div>';
+async function loadSlots() {
+  const date = document.getElementById('sessionDate').value;
+  const timeSelect = document.getElementById('sessionTime');
+  const msg = document.getElementById('slotMsg');
+  if (!date) { timeSelect.innerHTML = '<option>Pick a date first</option>'; timeSelect.disabled = true; return; }
+  timeSelect.disabled = true;
+  msg.textContent = 'Loading available slots...';
   try {
-    const data = await tutors.availability(tutorId, date);
-    if (data.slots.length === 0) {
-      container.innerHTML = '<div style="font-size:13px;color:var(--text-tertiary);">No available slots on this day. Try another date.</div>';
-      return;
+    const res = await fetch(`/api/tutors/${tutorId}/availability?date=${date}`);
+    const data = await res.json();
+    if (data.slots && data.slots.length) {
+      timeSelect.innerHTML = '<option value="">Select a time</option>' + data.slots.map(s => `<option value="${s}">${s}</option>`).join('');
+      timeSelect.disabled = false;
+      msg.textContent = `${data.slots.length} slot(s) available`;
+      msg.style.color = '#34d399';
+    } else {
+      timeSelect.innerHTML = '<option>No slots available</option>';
+      msg.textContent = 'No available slots for this date. Try another day.';
+      msg.style.color = '#f87171';
     }
-    container.innerHTML = `<div class="slot-grid">${data.slots.map(time => `
-      <button type="button" class="slot-btn" data-time="${time}" onclick="selectSlot(this, '${time}')">${time}</button>
-    `).join('')}</div>`;
-  } catch (err) {
-    container.innerHTML = `<div style="font-size:13px;color:var(--danger);">${err.message}</div>`;
+  } catch (e) {
+    timeSelect.innerHTML = '<option>Error loading slots</option>';
+    msg.textContent = 'Could not load availability.';
   }
 }
 
-function selectSlot(btn, time) {
-  document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedTime = time;
-  document.getElementById('book-btn').disabled = false;
-}
+function goToPayment() {
+  const subject = document.getElementById('subjectSelect').value;
+  const level = document.getElementById('levelSelect').value;
+  const date = document.getElementById('sessionDate').value;
+  const time = document.getElementById('sessionTime').value;
 
-function setBookingType(type) {
-  bookingType = type;
-  document.querySelectorAll('.booking-type-tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('session-booking').style.display = type === 'session' ? 'block' : 'none';
-  document.getElementById('package-booking').style.display = type === 'package' ? 'block' : 'none';
-}
-
-function selectPackage(id) {
-  selectedPackageId = id;
-  document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
-  document.querySelector(`.package-card[data-id="${id}"]`).classList.add('selected');
-  const pkg = currentTutor.packages.find(p => p.id === id);
-  if (pkg) {
-    document.getElementById('sel-pkg-name').textContent = pkg.name;
-    document.getElementById('sel-pkg-price').textContent = 'P' + pkg.price_per_month + '/month';
-    document.getElementById('sel-pkg-sessions').textContent = pkg.sessions_included + ' sessions';
-    document.getElementById('package-selected-info').style.display = 'block';
-    document.getElementById('subscribe-btn').disabled = false;
+  if (!subject || !level || !date || !time) {
+    alert('Please fill in all fields before proceeding to payment.');
+    return;
   }
+
+  document.getElementById('paySubject').textContent = subject + ' (' + level + ')';
+  document.getElementById('payDate').textContent = date;
+  document.getElementById('payTime').textContent = time;
+
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+  document.getElementById('dot1').classList.remove('active');
+  document.getElementById('dot2').classList.add('active');
 }
 
-async function subscribePackage() {
-  const btn = document.getElementById('subscribe-btn');
-  const alert = document.getElementById('book-alert');
-  alert.classList.remove('show', 'alert-error');
-  alert.classList.add('alert-success');
-  btn.disabled = true;
-  btn.textContent = 'Subscribing...';
+function goBack() {
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('dot2').classList.remove('active');
+  document.getElementById('dot1').classList.add('active');
+  document.getElementById('payError').style.display = 'none';
+}
+
+function selectMethod(el, val) {
+  document.querySelectorAll('.payment-method').forEach(m => { m.classList.remove('selected'); m.querySelector('input').checked = false; });
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+}
+
+async function submitBooking() {
+  const confirmed = document.getElementById('paymentConfirm').checked;
+  if (!confirmed) {
+    document.getElementById('payError').style.display = 'block';
+    return;
+  }
+  document.getElementById('payError').style.display = 'none';
+
+  const subject = document.getElementById('subjectSelect').value;
+  const level = document.getElementById('levelSelect').value;
+  const date = document.getElementById('sessionDate').value;
+  const time = document.getElementById('sessionTime').value;
+  const notes = document.getElementById('sessionNotes').value;
+  const method = document.querySelector('input[name="payMethod"]:checked').value;
 
   try {
-    await subscriptions.create({
-      tutor_id: parseInt(tutorId),
-      package_id: selectedPackageId,
-      start_date: new Date().toISOString().split('T')[0]
+    const res = await apiFetch('/api/bookings', {
+      method: 'POST',
+      body: JSON.stringify({
+        tutor_id: parseInt(tutorId),
+        booking_type: 'session',
+        subject: subject + ' — ' + level,
+        session_date: date,
+        session_time: time,
+        notes: notes + ' | Payment: ' + method + ' | Proof sent to WhatsApp +26778008555'
+      })
     });
-    alert.textContent = 'Subscription created! Go to your dashboard to book sessions using your package credits.';
-    alert.classList.add('show');
-    btn.textContent = 'Subscribed';
-  } catch (err) {
-    alert.textContent = err.message;
-    alert.classList.remove('alert-success');
-    alert.classList.add('alert-error');
-    alert.classList.add('show');
-    btn.disabled = false;
-    btn.textContent = 'Subscribe to package';
+    if (res.ok) {
+      alert('Booking request submitted! Your tutor will confirm shortly. Remember to send your payment screenshot to WhatsApp +267 78 008 555 if you haven\'t already.');
+      window.location.href = '/dashboard.html';
+    } else {
+      const data = await res.json();
+      alert(data.error || 'Failed to submit booking.');
+    }
+  } catch (e) {
+    alert('Network error. Please try again.');
   }
 }
+
+async function subscribePackage(packageId, price, name) {
+  const confirmPay = confirm(
+    `Subscribe to "${name}" for P${price}/month?\n\n` +
+    `IMPORTANT: You must pay LearnLink directly — NOT the tutor.\n` +
+    `Send P${price} via OrangeMoney, MyZaka, or Smega to +267 78 008 555.\n` +
+    `Then send your proof/screenshot to WhatsApp +267 78 008 555.\n\n` +
+    `If the tutor is unavailable, you will receive a full refund.\n\n` +
+    `Click OK to proceed after payment.`
+  );
+  if (!confirmPay) return;
+
+  const startDate = prompt('Enter start date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+  if (!startDate) return;
+
+  try {
+    const res = await apiFetch('/api/subscriptions', {
+      method: 'POST',
+      body: JSON.stringify({ tutor_id: parseInt(tutorId), package_id: packageId, start_date: startDate })
+    });
+    if (res.ok) {
+      alert('Subscription created! Please send your payment proof to WhatsApp +267 78 008 555.');
+      window.location.href = '/dashboard.html';
+    } else {
+      const data = await res.json();
+      alert(data.error || 'Failed to subscribe.');
+    }
+  } catch (e) {
+    alert('Network error. Please try again.');
+  }
+}
+
+// Auth guard
+if (!localStorage.getItem('token')) {
+  window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+}
+
+document.getElementById('logoutBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.location.href = '/';
+});
 
 loadTutor();
 </script>
-
-<footer class="footer">
-  <p>LearnLink — Connecting students with great tutors across Botswana.</p>
-  <div class="footer-links">
-    <a href="/">Home</a>
-    <a href="/terms.html">Terms & Conditions</a>
-    <a href="mailto:hello@learnlink.bw">hello@learnlink.bw</a>
-  </div>
-</footer>
 </body>
 </html>
