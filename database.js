@@ -126,6 +126,18 @@ async function initDatabase() {
     )
   `);
 
+  // NEW: password reset tokens
+  await run(`
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL,
+      token TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      used INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   const adminExists = await get("SELECT id FROM users WHERE email = ?", ['admin@learnlink.bw']);
   if (!adminExists) {
     const adminHash = bcrypt.hashSync('admin123', 10);

@@ -6,47 +6,106 @@
 <title>Dashboard — LearnLink</title>
 <link rel="stylesheet" href="/css/style.css">
 <style>
+  /* Loading overlay to prevent auth glitch */
+  #loadingScreen {
+    position: fixed; inset: 0; background: #0b1120; z-index: 9999;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+  }
+  #loadingScreen .spinner {
+    width: 40px; height: 40px; border: 3px solid #334155; border-top-color: #3b82f6;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   .student-notice {
-    background: #0c2e4e;
-    border: 1px solid #1d4ed8;
-    border-left: 4px solid #3b82f6;
-    color: #bfdbfe;
-    padding: 1rem 1.25rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    font-size: 0.92rem;
+    background: #0c2e4e; border: 1px solid #1d4ed8; border-left: 4px solid #3b82f6;
+    color: #bfdbfe; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.92rem;
   }
   .student-notice strong { color: #60a5fa; }
   .student-warning {
-    background: #451a1a;
-    border: 1px solid #b91c1c;
-    border-left: 4px solid #ef4444;
-    color: #fecaca;
-    padding: 1rem 1.25rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    font-size: 0.92rem;
+    background: #451a1a; border: 1px solid #b91c1c; border-left: 4px solid #ef4444;
+    color: #fecaca; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.92rem;
   }
   .student-warning strong { color: #f87171; }
-  .payment-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.75rem;
-    margin-top: 0.75rem;
-  }
-  .payment-chip {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 0.6rem;
-    text-align: center;
-    font-size: 0.85rem;
-  }
+  .payment-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+  .payment-chip { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 0.6rem; text-align: center; font-size: 0.85rem; }
   .payment-chip strong { color: #e2e8f0; display: block; }
   .payment-chip span { color: #94a3b8; font-size: 0.8rem; }
+
+  /* Booking cards clickable */
+  .booking-card { cursor: pointer; transition: all 0.2s; }
+  .booking-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,130,246,0.12); }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000;
+    display: none; align-items: center; justify-content: center; padding: 1rem;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+    max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto;
+    padding: 1.5rem; position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 1rem; right: 1rem; background: none; border: none;
+    color: #94a3b8; font-size: 1.5rem; cursor: pointer;
+  }
+  .modal-close:hover { color: #e2e8f0; }
+  .modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: #f1f5f9; }
+  .detail-row { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid #334155; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row span:first-child { color: #94a3b8; font-size: 0.9rem; }
+  .detail-row span:last-child { color: #e2e8f0; font-size: 0.9rem; font-weight: 500; text-align: right; }
+  .video-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white;
+    padding: 0.7rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600;
+    margin-top: 0.5rem;
+  }
+  .video-btn:hover { opacity: 0.9; }
+
+  /* Edit Profile */
+  .profile-section {
+    background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .profile-section h3 { margin: 0 0 1rem; font-size: 1.1rem; color: #f1f5f9; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; margin-bottom: 0.4rem; font-size: 0.9rem; color: #cbd5e1; }
+  .form-control {
+    width: 100%; padding: 0.6rem 0.8rem; background: #0f172a; border: 1px solid #334155;
+    border-radius: 8px; color: #f1f5f9; font-size: 0.95rem;
+  }
+  .form-control:focus { outline: none; border-color: #3b82f6; }
+  .btn { padding: 0.6rem 1.2rem; border-radius: 8px; border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+  .btn-outline { background: transparent; border: 1px solid #475569; color: #cbd5e1; }
+  .btn-outline:hover { background: #334155; }
+  .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.85rem; }
+  .alert { padding: 0.7rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; display: none; }
+  .alert-success { background: #064e3b; color: #a7f3d0; border: 1px solid #059669; }
+  .alert-error { background: #451a1a; color: #fecaca; border: 1px solid #b91c1c; }
+
+  .tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid #334155; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .tab {
+    padding: 0.6rem 1rem; background: none; border: none; color: #94a3b8;
+    cursor: pointer; font-size: 0.95rem; font-weight: 500; border-bottom: 2px solid transparent;
+  }
+  .tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+  .tab:hover { color: #e2e8f0; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 </style>
 </head>
 <body>
+<!-- Loading screen prevents auth glitch flash -->
+<div id="loadingScreen">
+  <div class="spinner"></div>
+  <p style="color:#94a3b8; margin-top:1rem;">Loading your dashboard...</p>
+</div>
+
 <nav class="navbar">
   <div class="container nav-content">
     <a href="/" class="logo">LearnLink</a>
@@ -59,17 +118,20 @@
 </nav>
 
 <div class="container" style="padding-top: 2rem;">
-  <h1 id="pageTitle">My Dashboard</h1>
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+    <h1 id="pageTitle" style="margin:0;">My Dashboard</h1>
+    <button class="btn btn-outline btn-sm" onclick="openEditProfile()">✏️ Edit Profile</button>
+  </div>
 
   <!-- STUDENT NOTICES -->
   <div id="studentNotices" style="display:none;">
     <div class="student-warning">
       <strong>🔒 Security Notice: Never Pay Tutors Directly</strong><br>
-      For your protection, all payments must go through LearnLink. We hold your funds and only release them to the tutor after your session is completed. <strong>Do not send money to any tutor's personal number.</strong> If a tutor asks you to pay them directly, report it immediately.
+      For your protection, all payments must go through LearnLink. We hold your funds and pay the tutor after your session is completed. <strong>Do not send money to any tutor's personal number.</strong> If a tutor asks you to pay them directly, report it immediately.
     </div>
     <div class="student-notice">
       <strong>💳 How Payment Works</strong><br>
-          After you request a session, you must pay LearnLink before the tutor confirms. Choose a method below, send the exact amount, then send your screenshot to our WhatsApp line for fast processing.
+      After you request a session, you must pay LearnLink before the tutor confirms. Choose a method below, send the exact amount, then send your screenshot to our WhatsApp line for fast processing.
       <div class="payment-grid">
         <div class="payment-chip"><strong>OrangeMoney</strong><span>+267 78 008 555</span></div>
         <div class="payment-chip"><strong>MyZaka</strong><span>+267 78 008 555</span></div>
@@ -85,7 +147,77 @@
     </div>
   </div>
 
-  <div id="dashboardContent"></div>
+  <!-- Tabs -->
+  <div class="tabs" id="dashboardTabs">
+    <button class="tab active" onclick="switchTab('bookings')" id="tab-bookings">My Bookings</button>
+    <button class="tab" onclick="switchTab('profile')" id="tab-profile">Profile</button>
+    <button class="tab" onclick="switchTab('schedule')" id="tab-schedule" style="display:none;">My Schedule</button>
+    <button class="tab" onclick="switchTab('packages')" id="tab-packages" style="display:none;">My Packages</button>
+    <button class="tab" onclick="switchTab('subscriptions')" id="tab-subscriptions" style="display:none;">Subscriptions</button>
+  </div>
+
+  <div id="panel-bookings" class="tab-panel active"></div>
+  <div id="panel-profile" class="tab-panel"></div>
+  <div id="panel-schedule" class="tab-panel"></div>
+  <div id="panel-packages" class="tab-panel"></div>
+  <div id="panel-subscriptions" class="tab-panel"></div>
+</div>
+
+<!-- Booking Detail Modal -->
+<div class="modal-overlay" id="bookingModal" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal-overlay" id="editProfileModal" onclick="closeEditProfile(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeEditProfile()">&times;</button>
+    <div class="modal-title">Edit Profile</div>
+    <div id="profileAlert" class="alert"></div>
+    <form id="editProfileForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="editName" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="editEmail" class="form-control" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" id="editPhone" class="form-control">
+      </div>
+      <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <button type="button" class="btn btn-outline" onclick="closeEditProfile()">Cancel</button>
+      </div>
+    </form>
+    <hr style="border:none; border-top:1px solid #334155; margin:1.5rem 0;">
+    <div class="modal-title" style="font-size:1.1rem;">Change Password</div>
+    <div id="passwordAlert" class="alert"></div>
+    <form id="changePasswordForm">
+      <div class="form-group">
+        <label>Current Password</label>
+        <input type="password" id="currentPassword" class="form-control" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="newPassword" class="form-control" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" id="confirmNewPassword" class="form-control" required minlength="6">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Change Password</button>
+    </form>
+  </div>
 </div>
 
 <footer class="footer" style="margin-top: 3rem; padding: 2rem 0; border-top: 1px solid #334155; text-align: center; color: #94a3b8; font-size: 0.9rem;">
@@ -102,47 +234,71 @@
 <script src="/js/app.js"></script>
 <script>
 let currentUser = null;
+let myBookings = [];
 
+/* ========== AUTH & INIT ========== */
 async function init() {
   const token = localStorage.getItem('token');
   if (!token) { window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname); return; }
+
   try {
     const res = await apiFetch('/api/auth/me');
     if (!res.ok) throw new Error('Auth failed');
     currentUser = await res.json();
+
+    // Hide loading screen ONLY after auth confirmed
+    document.getElementById('loadingScreen').style.display = 'none';
+
     document.getElementById('pageTitle').textContent = currentUser.role === 'tutor' ? 'Tutor Dashboard' : 'Student Dashboard';
+
     if (currentUser.role === 'student') {
       document.getElementById('studentNotices').style.display = 'block';
+      document.getElementById('tab-subscriptions').style.display = 'inline-block';
       loadStudentBookings();
       loadStudentSubscriptions();
+      renderProfilePanel();
     } else if (currentUser.role === 'tutor') {
+      document.getElementById('tab-schedule').style.display = 'inline-block';
+      document.getElementById('tab-packages').style.display = 'inline-block';
       loadTutorBookings();
       loadTutorSchedule();
       loadTutorPackages();
+      renderProfilePanel();
     } else if (currentUser.role === 'admin') {
       window.location.href = '/admin.html';
+      return;
     }
   } catch (e) {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/login.html';
   }
 }
 
+/* ========== TABS ========== */
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+/* ========== STUDENT BOOKINGS ========== */
 async function loadStudentBookings() {
-  const container = document.getElementById('dashboardContent');
+  const container = document.getElementById('panel-bookings');
   try {
     const res = await apiFetch('/api/bookings');
-    const bookings = await res.json();
-    let html = '<h2 style="margin-top: 2rem;">My Bookings</h2>';
-    if (!bookings.length) {
+    myBookings = await res.json();
+    let html = '<h2 style="margin-bottom:1rem;">My Bookings</h2>';
+    if (!myBookings.length) {
       html += '<p style="color: #64748b;">No bookings yet. <a href="/" style="color: #3b82f6;">Browse tutors</a> to get started.</p>';
     } else {
-      html += '<div style="display: grid; gap: 1rem; margin-top: 1rem;">';
-      for (const b of bookings) {
+      html += '<div style="display: grid; gap: 1rem;">';
+      for (const b of myBookings) {
         const statusColor = b.status === 'confirmed' ? '#34d399' : b.status === 'pending' ? '#fbbf24' : '#f87171';
         const canJoin = b.status === 'confirmed' && b.room_url;
         html += `
-          <div class="card" style="border-left: 4px solid ${statusColor};">
+          <div class="card booking-card" onclick="showBookingDetail(${b.id})" style="border-left: 4px solid ${statusColor};">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
               <div>
                 <strong style="color: #e2e8f0;">${b.subject}</strong>
@@ -152,7 +308,7 @@ async function loadStudentBookings() {
               <span style="text-transform: uppercase; font-size: 0.75rem; font-weight: 600; color: ${statusColor};">${b.status}</span>
             </div>
             ${b.status === 'pending' ? `<p style="margin-top: 0.75rem; color: #fbbf24; font-size: 0.85rem;">⏳ Awaiting tutor confirmation. Remember to send payment proof to WhatsApp if you haven't already.</p>` : ''}
-            ${canJoin ? `<a href="${b.room_url}" target="_blank" class="btn btn-primary" style="margin-top: 0.75rem; display: inline-block;">Join Video Call</a>` : ''}
+            ${canJoin ? `<p style="margin-top:0.5rem; color:#34d399; font-size:0.85rem;">🎥 Video call available — click card to join</p>` : ''}
           </div>
         `;
       }
@@ -160,16 +316,65 @@ async function loadStudentBookings() {
     }
     container.innerHTML = html;
   } catch (e) {
-    document.getElementById('dashboardContent').innerHTML = '<p style="color: #f87171;">Failed to load bookings.</p>';
+    document.getElementById('panel-bookings').innerHTML = '<p style="color: #f87171;">Failed to load bookings.</p>';
   }
 }
 
+/* ========== BOOKING DETAIL MODAL ========== */
+async function showBookingDetail(bookingId) {
+  const booking = myBookings.find(b => b.id === bookingId);
+  if (!booking) return;
+
+  const statusColor = booking.status === 'confirmed' ? '#34d399' : booking.status === 'pending' ? '#fbbf24' : '#f87171';
+  const canJoin = booking.status === 'confirmed' && booking.room_url;
+
+  let html = `
+    <div class="modal-title">Booking Details</div>
+    <div class="detail-row"><span>Subject</span><span>${booking.subject}</span></div>
+    <div class="detail-row"><span>Status</span><span style="color:${statusColor}; text-transform:capitalize;">${booking.status}</span></div>
+    <div class="detail-row"><span>Date</span><span>${booking.session_date}</span></div>
+    <div class="detail-row"><span>Time</span><span>${booking.session_time}</span></div>
+    <div class="detail-row"><span>Tutor</span><span>${booking.tutor_name || '—'}</span></div>
+    <div class="detail-row"><span>Tutor Phone</span><span>${booking.tutor_phone || '—'}</span></div>
+    <div class="detail-row"><span>Booking Type</span><span>${booking.booking_type === 'session' ? 'Single Session' : 'Monthly Package'}</span></div>
+    ${booking.package_name ? `<div class="detail-row"><span>Package</span><span>${booking.package_name}</span></div>` : ''}
+    ${booking.notes ? `<div class="detail-row"><span>Notes</span><span style="max-width:60%; word-break:break-word;">${booking.notes}</span></div>` : ''}
+    <div class="detail-row"><span>Booked On</span><span>${new Date(booking.created_at).toLocaleDateString()}</span></div>
+  `;
+
+  if (canJoin) {
+    html += `
+      <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid #334155;">
+        <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:0.75rem;">Your video session room is ready. Click below to join:</p>
+        <a href="${booking.room_url}" target="_blank" class="video-btn">🎥 Join Video Call</a>
+      </div>
+    `;
+  } else if (booking.status === 'pending') {
+    html += `
+      <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid #334155;">
+        <p style="color:#fbbf24; font-size:0.9rem;">⏳ Waiting for tutor to confirm. Once confirmed, the video link will appear here.</p>
+      </div>
+    `;
+  }
+
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('bookingModal').classList.add('active');
+}
+
+function closeModal(e) {
+  if (!e || e.target.id === 'bookingModal') {
+    document.getElementById('bookingModal').classList.remove('active');
+  }
+}
+
+/* ========== SUBSCRIPTIONS ========== */
 async function loadStudentSubscriptions() {
   try {
     const res = await apiFetch('/api/my-subscriptions');
     const subs = await res.json();
-    if (!subs.length) return;
-    let html = '<h2 style="margin-top: 2rem;">My Subscriptions</h2><div style="display: grid; gap: 1rem; margin-top: 1rem;">';
+    const container = document.getElementById('panel-subscriptions');
+    if (!subs.length) { container.innerHTML = '<h2>My Subscriptions</h2><p style="color:#64748b;">No active subscriptions.</p>'; return; }
+    let html = '<h2 style="margin-bottom:1rem;">My Subscriptions</h2><div style="display: grid; gap: 1rem;">';
     for (const s of subs) {
       html += `
         <div class="card">
@@ -181,40 +386,42 @@ async function loadStudentSubscriptions() {
       `;
     }
     html += '</div>';
-    document.getElementById('dashboardContent').innerHTML += html;
-  } catch (e) {}
+    container.innerHTML = html;
+  } catch (e) {
+    document.getElementById('panel-subscriptions').innerHTML = '<p style="color:#f87171;">Failed to load subscriptions.</p>';
+  }
 }
 
+/* ========== TUTOR BOOKINGS ========== */
 async function loadTutorBookings() {
-  const container = document.getElementById('dashboardContent');
+  const container = document.getElementById('panel-bookings');
   try {
     const res = await apiFetch('/api/bookings');
-    const bookings = await res.json();
-    let html = '<h2 style="margin-top: 2rem;">Incoming Bookings</h2>';
-    if (!bookings.length) {
+    myBookings = await res.json();
+    let html = '<h2 style="margin-bottom:1rem;">Incoming Bookings</h2>';
+    if (!myBookings.length) {
       html += '<p style="color: #64748b;">No bookings yet.</p>';
     } else {
-      html += '<div style="display: grid; gap: 1rem; margin-top: 1rem;">';
-      for (const b of bookings) {
+      html += '<div style="display: grid; gap: 1rem;">';
+      for (const b of myBookings) {
         const statusColor = b.status === 'confirmed' ? '#34d399' : b.status === 'pending' ? '#fbbf24' : '#f87171';
         const canJoin = b.status === 'confirmed' && b.room_url;
         html += `
-          <div class="card" style="border-left: 4px solid ${statusColor};">
+          <div class="card booking-card" onclick="showBookingDetail(${b.id})" style="border-left: 4px solid ${statusColor};">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
               <div>
                 <strong style="color: #e2e8f0;">${b.subject}</strong>
                 <p style="margin: 0.25rem 0 0; color: #94a3b8; font-size: 0.9rem;">Student: ${b.student_name} (${b.student_phone || 'no phone'}) · ${b.session_date} at ${b.session_time}</p>
-                ${b.notes ? `<p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.85rem;">Notes: ${b.notes}</p>` : ''}
               </div>
               <span style="text-transform: uppercase; font-size: 0.75rem; font-weight: 600; color: ${statusColor};">${b.status}</span>
             </div>
             ${b.status === 'pending' ? `
-              <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
-                <button class="btn btn-primary" onclick="updateBooking(${b.id}, 'confirmed')">Confirm</button>
-                <button class="btn btn-outline" style="color: #f87171; border-color: #b91c1c;" onclick="updateBooking(${b.id}, 'declined')">Decline</button>
+              <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;" onclick="event.stopPropagation()">
+                <button class="btn btn-primary btn-sm" onclick="updateBooking(${b.id}, 'confirmed')">Confirm</button>
+                <button class="btn btn-outline btn-sm" style="color: #f87171; border-color: #b91c1c;" onclick="updateBooking(${b.id}, 'declined')">Decline</button>
               </div>
             ` : ''}
-            ${canJoin ? `<a href="${b.room_url}" target="_blank" class="btn btn-primary" style="margin-top: 0.75rem; display: inline-block;">Join Video Call</a>` : ''}
+            ${canJoin ? `<p style="margin-top:0.5rem; color:#34d399; font-size:0.85rem;">🎥 Video call available — click card to join</p>` : ''}
           </div>
         `;
       }
@@ -222,25 +429,253 @@ async function loadTutorBookings() {
     }
     container.innerHTML = html;
   } catch (e) {
-    document.getElementById('dashboardContent').innerHTML = '<p style="color: #f87171;">Failed to load bookings.</p>';
+    document.getElementById('panel-bookings').innerHTML = '<p style="color: #f87171;">Failed to load bookings.</p>';
   }
-}
-
-async function loadTutorSchedule() {
-  // Placeholder — your existing schedule code remains
-}
-async function loadTutorPackages() {
-  // Placeholder — your existing packages code remains
 }
 
 async function updateBooking(id, status) {
   try {
     const res = await apiFetch(`/api/bookings/${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
-    if (res.ok) { alert(status === 'confirmed' ? 'Booking confirmed! Video room will be created.' : 'Booking declined.'); location.reload(); }
+    if (res.ok) { alert(status === 'confirmed' ? 'Booking confirmed! Video room created.' : 'Booking declined.'); location.reload(); }
     else { const d = await res.json(); alert(d.error || 'Failed.'); }
   } catch (e) { alert('Network error.'); }
 }
 
+/* ========== TUTOR SCHEDULE ========== */
+async function loadTutorSchedule() {
+  const container = document.getElementById('panel-schedule');
+  try {
+    const res = await apiFetch('/api/my-schedule');
+    const schedules = await res.json();
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    let html = '<h2 style="margin-bottom:1rem;">My Weekly Schedule</h2>';
+    if (!schedules.length) {
+      html += '<p style="color:#64748b;">No schedule set. Students won\'t see available slots.</p>';
+    } else {
+      html += '<div style="display:grid; gap:0.75rem;">';
+      for (const s of schedules) {
+        html += `
+          <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#e2e8f0;">${days[s.day_of_week]} · ${s.start_time} – ${s.end_time}</span>
+            <button class="btn btn-outline btn-sm" onclick="deleteSchedule(${s.id})" style="color:#f87171; border-color:#b91c1c;">Remove</button>
+          </div>
+        `;
+      }
+      html += '</div>';
+    }
+    html += `
+      <div class="profile-section" style="margin-top:1.5rem;">
+        <h3>Add Availability</h3>
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:flex-end;">
+          <select id="schDay" class="form-control" style="width:auto; min-width:140px;">
+            <option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option>
+            <option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option>
+          </select>
+          <input type="time" id="schStart" class="form-control" style="width:auto;">
+          <input type="time" id="schEnd" class="form-control" style="width:auto;">
+          <button class="btn btn-primary" onclick="addSchedule()">Add</button>
+        </div>
+      </div>
+    `;
+    container.innerHTML = html;
+  } catch (e) { container.innerHTML = '<p style="color:#f87171;">Failed to load schedule.</p>'; }
+}
+
+async function addSchedule() {
+  const day = document.getElementById('schDay').value;
+  const start = document.getElementById('schStart').value;
+  const end = document.getElementById('schEnd').value;
+  if (!start || !end) return alert('Please select start and end times.');
+  try {
+    const res = await apiFetch('/api/my-schedule', { method: 'POST', body: JSON.stringify({ day_of_week: parseInt(day), start_time: start, end_time: end }) });
+    if (res.ok) location.reload(); else { const d = await res.json(); alert(d.error); }
+  } catch (e) { alert('Network error.'); }
+}
+async function deleteSchedule(id) {
+  if (!confirm('Remove this slot?')) return;
+  try {
+    const res = await apiFetch(`/api/my-schedule/${id}`, { method: 'DELETE' });
+    if (res.ok) location.reload(); else alert('Failed.');
+  } catch (e) { alert('Network error.'); }
+}
+
+/* ========== TUTOR PACKAGES ========== */
+async function loadTutorPackages() {
+  const container = document.getElementById('panel-packages');
+  try {
+    const res = await apiFetch('/api/my-packages');
+    const pkgs = await res.json();
+    let html = '<h2 style="margin-bottom:1rem;">My Monthly Packages</h2>';
+    if (!pkgs.length) { html += '<p style="color:#64748b;">No packages created yet.</p>'; }
+    else {
+      html += '<div style="display:grid; gap:0.75rem;">';
+      for (const p of pkgs) {
+        html += `
+          <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <strong style="color:#e2e8f0;">${p.name}</strong>
+              <p style="margin:0.15rem 0 0; color:#94a3b8; font-size:0.85rem;">P${p.price_per_month}/mo · ${p.sessions_included} sessions · ${p.is_active ? 'Active' : 'Inactive'}</p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="deletePackage(${p.id})" style="color:#f87171; border-color:#b91c1c;">Delete</button>
+          </div>
+        `;
+      }
+      html += '</div>';
+    }
+    html += `
+      <div class="profile-section" style="margin-top:1.5rem;">
+        <h3>Create Package</h3>
+        <div class="form-group"><label>Name</label><input type="text" id="pkgName" class="form-control" placeholder="e.g. Math Mastery Plan"></div>
+        <div class="form-group"><label>Description</label><input type="text" id="pkgDesc" class="form-control" placeholder="Brief description"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Price (P/month)</label><input type="number" id="pkgPrice" class="form-control"></div>
+          <div class="form-group"><label>Sessions</label><input type="number" id="pkgSessions" class="form-control" value="4"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Subjects</label><input type="text" id="pkgSubjects" class="form-control" placeholder="e.g. Mathematics, Physics"></div>
+          <div class="form-group"><label>Levels</label><input type="text" id="pkgLevels" class="form-control" placeholder="e.g. BGCSE, IGCSE"></div>
+        </div>
+        <button class="btn btn-primary" onclick="createPackage()">Create Package</button>
+      </div>
+    `;
+    container.innerHTML = html;
+  } catch (e) { container.innerHTML = '<p style="color:#f87171;">Failed to load packages.</p>'; }
+}
+
+async function createPackage() {
+  const body = {
+    name: document.getElementById('pkgName').value,
+    description: document.getElementById('pkgDesc').value,
+    price_per_month: parseInt(document.getElementById('pkgPrice').value),
+    sessions_included: parseInt(document.getElementById('pkgSessions').value),
+    subjects: document.getElementById('pkgSubjects').value,
+    levels: document.getElementById('pkgLevels').value
+  };
+  if (!body.name || !body.price_per_month || !body.subjects || !body.levels) return alert('Fill all required fields.');
+  try {
+    const res = await apiFetch('/api/my-packages', { method: 'POST', body: JSON.stringify(body) });
+    if (res.ok) location.reload(); else { const d = await res.json(); alert(d.error); }
+  } catch (e) { alert('Network error.'); }
+}
+async function deletePackage(id) {
+  if (!confirm('Delete this package?')) return;
+  try {
+    const res = await apiFetch(`/api/my-packages/${id}`, { method: 'DELETE' });
+    if (res.ok) location.reload(); else alert('Failed.');
+  } catch (e) { alert('Network error.'); }
+}
+
+/* ========== PROFILE PANEL ========== */
+function renderProfilePanel() {
+  const container = document.getElementById('panel-profile');
+  container.innerHTML = `
+    <div class="profile-section">
+      <h3>My Profile</h3>
+      <div class="detail-row"><span>Full Name</span><span>${currentUser.full_name}</span></div>
+      <div class="detail-row"><span>Email</span><span>${currentUser.email}</span></div>
+      <div class="detail-row"><span>Phone</span><span>${currentUser.phone || '—'}</span></div>
+      <div class="detail-row"><span>Role</span><span style="text-transform:capitalize;">${currentUser.role}</span></div>
+      <div class="detail-row"><span>Member Since</span><span>${new Date(currentUser.created_at || Date.now()).toLocaleDateString()}</span></div>
+      <button class="btn btn-primary" style="margin-top:1rem;" onclick="openEditProfile()">Edit Profile</button>
+    </div>
+  `;
+}
+
+/* ========== EDIT PROFILE MODAL ========== */
+function openEditProfile() {
+  document.getElementById('editName').value = currentUser.full_name;
+  document.getElementById('editEmail').value = currentUser.email;
+  document.getElementById('editPhone').value = currentUser.phone || '';
+  document.getElementById('profileAlert').style.display = 'none';
+  document.getElementById('passwordAlert').style.display = 'none';
+  document.getElementById('editProfileModal').classList.add('active');
+}
+function closeEditProfile(e) {
+  if (!e || e.target.id === 'editProfileModal') {
+    document.getElementById('editProfileModal').classList.remove('active');
+  }
+}
+
+document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertBox = document.getElementById('profileAlert');
+  alertBox.style.display = 'none';
+  try {
+    const res = await apiFetch('/api/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        full_name: document.getElementById('editName').value,
+        email: document.getElementById('editEmail').value,
+        phone: document.getElementById('editPhone').value
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alertBox.className = 'alert alert-success';
+      alertBox.textContent = 'Profile updated successfully!';
+      alertBox.style.display = 'block';
+      currentUser.full_name = document.getElementById('editName').value;
+      currentUser.email = document.getElementById('editEmail').value;
+      currentUser.phone = document.getElementById('editPhone').value;
+      localStorage.setItem('user', JSON.stringify(currentUser));
+      renderProfilePanel();
+      setTimeout(() => closeEditProfile(), 1200);
+    } else {
+      alertBox.className = 'alert alert-error';
+      alertBox.textContent = data.error || 'Update failed';
+      alertBox.style.display = 'block';
+    }
+  } catch (err) {
+    alertBox.className = 'alert alert-error';
+    alertBox.textContent = 'Network error.';
+    alertBox.style.display = 'block';
+  }
+});
+
+document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertBox = document.getElementById('passwordAlert');
+  alertBox.style.display = 'none';
+  const newPass = document.getElementById('newPassword').value;
+  const confirmPass = document.getElementById('confirmNewPassword').value;
+  if (newPass !== confirmPass) {
+    alertBox.className = 'alert alert-error';
+    alertBox.textContent = 'New passwords do not match.';
+    alertBox.style.display = 'block';
+    return;
+  }
+  try {
+    const res = await apiFetch('/api/auth/change-password', {
+      method: 'PUT',
+      body: JSON.stringify({
+        current_password: document.getElementById('currentPassword').value,
+        new_password: newPass
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alertBox.className = 'alert alert-success';
+      alertBox.textContent = 'Password changed! Please log in again.';
+      alertBox.style.display = 'block';
+      document.getElementById('changePasswordForm').reset();
+      setTimeout(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login.html';
+      }, 1500);
+    } else {
+      alertBox.className = 'alert alert-error';
+      alertBox.textContent = data.error || 'Failed to change password';
+      alertBox.style.display = 'block';
+    }
+  } catch (err) {
+    alertBox.className = 'alert alert-error';
+    alertBox.textContent = 'Network error.';
+    alertBox.style.display = 'block';
+  }
+});
+
+/* ========== LOGOUT ========== */
 document.getElementById('logoutBtn').addEventListener('click', (e) => {
   e.preventDefault();
   localStorage.removeItem('token');
@@ -248,6 +683,7 @@ document.getElementById('logoutBtn').addEventListener('click', (e) => {
   window.location.href = '/';
 });
 
+// Start
 init();
 </script>
 </body>

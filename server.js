@@ -3,6 +3,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const crypto = require('crypto');
 const { db, run, get, all, initDatabase } = require('./database');
 
 const app = express();
@@ -69,6 +70,59 @@ app.get('/api/auth/me', authenticate, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// NEW: Forgot password
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+    const user = await get('SELECT id FROM users WHERE email = ?', [email]);
+    if (!user) return res.status(404).json({ error: 'No account found with that email' });
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 3600000).toISOString(); // 1 hour
+    await run('INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)', [email, token, expires]);
+    res.json({ message: 'Reset token generated. Use it within 1 hour.', token });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// NEW: Reset password with token
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { token, new_password } = req.body;
+    if (!token || !new_password) return res.status(400).json({ error: 'Token and new password required' });
+    const reset = await get('SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > ?', [token, new Date().toISOString()]);
+    if (!reset) return res.status(400).json({ error: 'Invalid or expired token' });
+    const hash = bcrypt.hashSync(new_password, 10);
+    await run('UPDATE users SET password_hash = ? WHERE email = ?', [hash, reset.email]);
+    await run('UPDATE password_resets SET used = 1 WHERE id = ?', [reset.id]);
+    res.json({ message: 'Password reset successfully. You can now log in.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// NEW: Update own profile
+app.put('/api/auth/profile', authenticate, async (req, res) => {
+  try {
+    const { full_name, email, phone } = req.body;
+    if (!full_name || !email) return res.status(400).json({ error: 'Name and email required' });
+    const existing = await get('SELECT id FROM users WHERE email = ? AND id != ?', [email, req.user.id]);
+    if (existing) return res.status(400).json({ error: 'Email already in use' });
+    await run('UPDATE users SET full_name = ?, email = ?, phone = ? WHERE id = ?', [full_name, email, phone || '', req.user.id]);
+    res.json({ message: 'Profile updated' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// NEW: Change own password
+app.put('/api/auth/change-password', authenticate, async (req, res) => {
+  try {
+    const { current_password, new_password } = req.body;
+    if (!current_password || !new_password) return res.status(400).json({ error: 'Both passwords required' });
+    const user = await get('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
+    if (!bcrypt.compareSync(current_password, user.password_hash)) return res.status(401).json({ error: 'Current password is incorrect' });
+    const hash = bcrypt.hashSync(new_password, 10);
+    await run('UPDATE users SET password_hash = ? WHERE id = ?', [hash, req.user.id]);
+    res.json({ message: 'Password changed successfully' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ===== TUTORS =====
 app.get('/api/tutors', async (req, res) => {
   try {
@@ -89,7 +143,6 @@ app.get('/api/tutors/:id', async (req, res) => {
   try {
     const tutor = await get(`SELECT t.*, u.full_name, u.email, u.phone FROM tutors t JOIN users u ON t.user_id = u.id WHERE t.id = ? AND t.is_approved = 1`, [req.params.id]);
     if (!tutor) return res.status(404).json({ error: 'Tutor not found' });
-    // Get packages
     const packages = await all('SELECT * FROM monthly_packages WHERE tutor_id = ? AND is_active = 1', [req.params.id]);
     tutor.packages = packages;
     res.json(tutor);
@@ -106,6 +159,18 @@ app.post('/api/tutors/apply', authenticate, async (req, res) => {
       [req.user.id, bio || '', subjects, levels, price_per_hour, location, education || '']);
     await run("UPDATE users SET role = 'tutor' WHERE id = ?", [req.user.id]);
     res.json({ id: result.lastID, message: 'Application submitted. Awaiting approval.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// NEW: Update tutor profile
+app.put('/api/tutors/me', authenticate, async (req, res) => {
+  try {
+    const tutor = await get('SELECT id FROM tutors WHERE user_id = ?', [req.user.id]);
+    if (!tutor) return res.status(403).json({ error: 'Not a tutor' });
+    const { bio, subjects, levels, price_per_hour, location, education } = req.body;
+    await run('UPDATE tutors SET bio=?, subjects=?, levels=?, price_per_hour=?, location=?, education=? WHERE id=?',
+      [bio, subjects, levels, price_per_hour, location, education, tutor.id]);
+    res.json({ message: 'Tutor profile updated' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -241,6 +306,28 @@ app.get('/api/bookings', authenticate, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// NEW: Get single booking detail
+app.get('/api/bookings/:id', authenticate, async (req, res) => {
+  try {
+    let sql, params;
+    if (req.user.role === 'student') {
+      sql = `SELECT b.*, u.full_name as tutor_name, u.phone as tutor_phone, u.email as tutor_email, p.name as package_name FROM bookings b JOIN tutors t ON b.tutor_id = t.id JOIN users u ON t.user_id = u.id LEFT JOIN monthly_packages p ON b.package_id = p.id WHERE b.id = ? AND b.student_id = ?`;
+      params = [req.params.id, req.user.id];
+    } else if (req.user.role === 'tutor') {
+      const tutor = await get('SELECT id FROM tutors WHERE user_id = ?', [req.user.id]);
+      if (!tutor) return res.status(403).json({ error: 'Not a tutor' });
+      sql = `SELECT b.*, u.full_name as student_name, u.phone as student_phone, u.email as student_email, p.name as package_name FROM bookings b JOIN users u ON b.student_id = u.id LEFT JOIN monthly_packages p ON b.package_id = p.id WHERE b.id = ? AND b.tutor_id = ?`;
+      params = [req.params.id, tutor.id];
+    } else if (req.user.role === 'admin') {
+      sql = `SELECT b.*, s.full_name as student_name, s.phone as student_phone, s.email as student_email, t_user.full_name as tutor_name, t_user.phone as tutor_phone, t_user.email as tutor_email, p.name as package_name FROM bookings b JOIN users s ON b.student_id = s.id JOIN tutors t ON b.tutor_id = t.id JOIN users t_user ON t.user_id = t_user.id LEFT JOIN monthly_packages p ON b.package_id = p.id WHERE b.id = ?`;
+      params = [req.params.id];
+    } else { return res.status(403).json({ error: 'Forbidden' }); }
+    const booking = await get(sql, params);
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    res.json(booking);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ===== DAILY.CO ROOM CREATION =====
 async function createDailyRoom(bookingId) {
   if (!DAILY_API_KEY) return null;
@@ -343,6 +430,17 @@ app.get('/api/admin/bookings', authenticate, requireRole('admin'), async (req, r
 app.get('/api/admin/users', authenticate, requireRole('admin'), async (req, res) => {
   try { const users = await all(`SELECT id, full_name, email, phone, role, created_at FROM users ORDER BY created_at DESC`); res.json(users); }
   catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// NEW: Admin reset user password
+app.put('/api/admin/users/:id/reset-password', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { new_password } = req.body;
+    if (!new_password) return res.status(400).json({ error: 'New password required' });
+    const hash = bcrypt.hashSync(new_password, 10);
+    await run('UPDATE users SET password_hash = ? WHERE id = ?', [hash, req.params.id]);
+    res.json({ message: 'Password reset successfully' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.get('/api/admin/stats', authenticate, requireRole('admin'), async (req, res) => {

@@ -5,140 +5,319 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel — LearnLink</title>
 <link rel="stylesheet" href="/css/style.css">
+<style>
+  #loadingScreen {
+    position: fixed; inset: 0; background: #0b1120; z-index: 9999;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+  }
+  #loadingScreen .spinner {
+    width: 40px; height: 40px; border: 3px solid #334155; border-top-color: #3b82f6;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.25rem; text-align: center; }
+  .stat-card strong { display: block; font-size: 2rem; color: #f1f5f9; }
+  .stat-card span { color: #94a3b8; font-size: 0.9rem; }
+
+  .tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid #334155; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .tab { padding: 0.6rem 1rem; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 0.95rem; font-weight: 500; border-bottom: 2px solid transparent; }
+  .tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+  .tab:hover { color: #e2e8f0; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .admin-table { width: 100%; border-collapse: collapse; }
+  .admin-table th { text-align: left; padding: 0.75rem; color: #94a3b8; font-size: 0.85rem; font-weight: 600; border-bottom: 1px solid #334155; }
+  .admin-table td { padding: 0.75rem; border-bottom: 1px solid #1e293b; color: #e2e8f0; font-size: 0.9rem; }
+  .admin-table tr:hover td { background: rgba(59,130,246,0.05); }
+  .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+  .badge-pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .badge-approved { background: rgba(52,211,153,0.15); color: #34d399; }
+  .badge-admin { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .badge-student { background: rgba(96,165,250,0.15); color: #60a5fa; }
+  .badge-tutor { background: rgba(248,113,113,0.15); color: #f87171; }
+
+  .btn { padding: 0.45rem 0.9rem; border-radius: 6px; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+  .btn-outline { background: transparent; border: 1px solid #475569; color: #cbd5e1; }
+  .btn-danger { background: #b91c1c; color: white; }
+  .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000;
+    display: none; align-items: center; justify-content: center; padding: 1rem;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+    max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto;
+    padding: 1.5rem; position: relative;
+  }
+  .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
+  .modal-close:hover { color: #e2e8f0; }
+  .modal-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: #f1f5f9; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; margin-bottom: 0.4rem; font-size: 0.9rem; color: #cbd5e1; }
+  .form-control { width: 100%; padding: 0.6rem 0.8rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #f1f5f9; font-size: 0.95rem; }
+  .form-control:focus { outline: none; border-color: #3b82f6; }
+  .alert { padding: 0.7rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; display: none; }
+  .alert-success { background: #064e3b; color: #a7f3d0; border: 1px solid #059669; }
+  .alert-error { background: #451a1a; color: #fecaca; border: 1px solid #b91c1c; }
+</style>
 </head>
 <body>
+<div id="loadingScreen">
+  <div class="spinner"></div>
+  <p style="color:#94a3b8; margin-top:1rem;">Loading admin panel...</p>
+</div>
 
 <nav class="navbar">
-  <div class="navbar-inner">
-    <a href="/" class="nav-brand">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      LearnLink
-    </a>
-    <div class="nav-links" id="nav-links"></div>
+  <div class="container nav-content">
+    <a href="/" class="logo">LearnLink</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="#" id="logoutBtn">Logout</a>
+    </div>
   </div>
 </nav>
 
-<div class="container">
-  <div class="section">
-    <h1 class="section-title">Admin Panel</h1>
-    <p class="section-sub">Manage tutors, bookings, and users</p>
+<div class="container" style="padding-top: 2rem;">
+  <h1 style="margin-bottom:0.25rem;">Admin Panel</h1>
+  <p style="color:#94a3b8; margin-bottom:1.5rem;">Manage tutors, bookings, users, and platform settings.</p>
 
-    <div class="admin-stats" id="admin-stats">
-      <div class="admin-stat"><div class="number">—</div><div class="label">Users</div></div>
-      <div class="admin-stat"><div class="number">—</div><div class="label">Tutors</div></div>
-      <div class="admin-stat"><div class="number">—</div><div class="label">Pending</div></div>
-      <div class="admin-stat"><div class="number">—</div><div class="label">Bookings</div></div>
-      <div class="admin-stat"><div class="number">—</div><div class="label">Pending bookings</div></div>
-    </div>
+  <div class="stats-grid" id="statsGrid"></div>
 
-    <div class="card" style="margin-bottom:32px; border-left:3px solid var(--accent);">
-      <div style="display:flex; gap:12px; align-items:flex-start;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-        <div>
-          <p style="font-size:14px; font-weight:500; color:var(--text-primary); margin-bottom:4px;">Commission structure</p>
-          <p style="font-size:13px; color:var(--text-secondary); line-height:1.5;">LearnLink charges a <strong style="color:var(--accent);">15% commission</strong> on every booking. Tutors receive <strong>85%</strong> of their listed rate. All sessions are held online via video call. Payments to tutors are processed within 24 hours of a completed session.</p>
-        </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('pending')" id="tab-pending">Pending Tutors</button>
+    <button class="tab" onclick="switchTab('bookings')" id="tab-bookings">All Bookings</button>
+    <button class="tab" onclick="switchTab('users')" id="tab-users">All Users</button>
+  </div>
+
+  <div id="panel-pending" class="tab-panel active"></div>
+  <div id="panel-bookings" class="tab-panel"></div>
+  <div id="panel-users" class="tab-panel"></div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal-overlay" id="resetModal" onclick="closeResetModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeResetModal()">&times;</button>
+    <div class="modal-title">Reset User Password</div>
+    <div id="resetAlert" class="alert"></div>
+    <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:1rem;">Resetting password for: <strong id="resetUserName" style="color:#e2e8f0;"></strong></p>
+    <form id="resetPasswordForm">
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" id="adminNewPassword" class="form-control" required minlength="6">
       </div>
-    </div>
-
-    <div class="tabs">
-      <button class="tab active" data-tab="pending">Pending tutors</button>
-      <button class="tab" data-tab="bookings">All bookings</button>
-      <button class="tab" data-tab="users">All users</button>
-    </div>
-
-    <div id="tab-pending">
-      <div id="pending-content"><div class="loading">Loading...</div></div>
-    </div>
-
-    <div id="tab-bookings" style="display:none;">
-      <div id="all-bookings-content"><div class="loading">Loading...</div></div>
-    </div>
-
-    <div id="tab-users" style="display:none;">
-      <div id="all-users-content"><div class="loading">Loading...</div></div>
-    </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="adminConfirmPassword" class="form-control" required minlength="6">
+      </div>
+      <button type="submit" class="btn btn-primary">Reset Password</button>
+    </form>
   </div>
 </div>
 
+<footer style="margin-top: 3rem; padding: 2rem 0; border-top: 1px solid #334155; text-align: center; color: #94a3b8; font-size: 0.9rem;">
+  <div class="container">
+    <p>LearnLink — Admin Panel</p>
+    <p style="margin-top: 0.5rem;">
+      <a href="/" style="color: #94a3b8; margin: 0 0.5rem;">Home</a>
+      <a href="/terms.html" style="color: #94a3b8; margin: 0 0.5rem;">Terms & Conditions</a>
+    </p>
+  </div>
+</footer>
+
 <script src="/js/app.js"></script>
 <script>
-requireAdmin();
+let currentUser = null;
+let resetUserId = null;
 
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    ['pending', 'bookings', 'users'].forEach(id => {
-      document.getElementById('tab-' + id).style.display = tab.dataset.tab === id ? 'block' : 'none';
-    });
-  });
-});
+async function init() {
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = '/login.html'; return; }
+  try {
+    const res = await apiFetch('/api/auth/me');
+    if (!res.ok) throw new Error('Auth failed');
+    currentUser = await res.json();
+    if (currentUser.role !== 'admin') { window.location.href = '/dashboard.html'; return; }
+    document.getElementById('loadingScreen').style.display = 'none';
+    loadStats();
+    loadPendingTutors();
+    loadAllBookings();
+    loadAllUsers();
+  } catch (e) {
+    localStorage.removeItem('token');
+    window.location.href = '/login.html';
+  }
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
 
 async function loadStats() {
   try {
-    const stats = await admin.stats();
-    const nums = document.querySelectorAll('.admin-stat .number');
-    nums[0].textContent = stats.totalUsers;
-    nums[1].textContent = stats.totalTutors;
-    nums[2].textContent = stats.pendingTutors;
-    nums[3].textContent = stats.totalBookings;
-    nums[4].textContent = stats.pendingBookings;
-  } catch (err) { console.error('Stats error:', err); }
+    const res = await apiFetch('/api/admin/stats');
+    const s = await res.json();
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card"><strong>${s.totalUsers}</strong><span>Total Users</span></div>
+      <div class="stat-card"><strong>${s.totalTutors}</strong><span>Active Tutors</span></div>
+      <div class="stat-card"><strong>${s.pendingTutors}</strong><span>Pending Tutors</span></div>
+      <div class="stat-card"><strong>${s.totalBookings}</strong><span>Total Bookings</span></div>
+      <div class="stat-card"><strong>${s.pendingBookings}</strong><span>Pending Bookings</span></div>
+    `;
+  } catch (e) {}
 }
 
-async function loadPending() {
+async function loadPendingTutors() {
+  const container = document.getElementById('panel-pending');
   try {
-    const list = await admin.pendingTutors();
-    const container = document.getElementById('pending-content');
-    if (list.length === 0) {
-      container.innerHTML = `<div class="empty-state"><h3>No pending applications</h3><p>All tutor applications have been reviewed.</p></div>`;
-      return;
+    const res = await apiFetch('/api/admin/pending-tutors');
+    const tutors = await res.json();
+    if (!tutors.length) { container.innerHTML = '<p style="color:#64748b;">No pending tutor applications.</p>'; return; }
+    let html = '<div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Subjects</th><th>Price</th><th>Location</th><th>Actions</th></tr></thead><tbody>';
+    for (const t of tutors) {
+      html += `<tr>
+        <td><strong>${t.full_name}</strong><br><span style="color:#64748b; font-size:0.8rem;">${t.education || 'No education listed'}</span></td>
+        <td>${t.email}</td><td>${t.phone || '—'}</td><td>${t.subjects}</td><td>P${t.price_per_hour}/hr</td><td>${t.location}</td>
+        <td>
+          <button class="btn btn-primary btn-sm" onclick="approveTutor(${t.id})">Approve</button>
+          <button class="btn btn-danger btn-sm" style="margin-left:0.5rem;" onclick="rejectTutor(${t.id})">Reject</button>
+        </td>
+      </tr>`;
     }
-    container.innerHTML = `<div class="tutor-grid">${list.map(t => {
-      const initials = t.full_name.split(' ').map(n => n[0]).join('').slice(0,2);
-      const subjects = t.subjects.split(',').map(s => `<span class="tag">${s.trim()}</span>`).join('');
-      const levels = t.levels.split(',').map(l => `<span class="tag">${l.trim()}</span>`).join('');
-      return `<div class="tutor-card"><div class="tutor-avatar">${initials}</div><div class="tutor-info"><div class="tutor-name">${t.full_name}</div><div class="tutor-meta">${t.education || '—'} · ${t.location} · P${t.price_per_hour}/hr</div><div class="tutor-tags">${subjects}${levels}</div><p style="font-size:13px;color:var(--text-secondary);margin-top:8px;">${t.bio}</p><div style="margin-top:12px;display:flex;gap:8px;"><button class="btn btn-sm btn-success" onclick="approveTutor(${t.id})">Approve</button><button class="btn btn-sm btn-danger" onclick="rejectTutor(${t.id})">Reject</button></div></div></div>`;
-    }).join('')}</div>`;
-  } catch (err) { document.getElementById('pending-content').innerHTML = `<p style="color:var(--danger);">${err.message}</p>`; }
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  } catch (e) { container.innerHTML = '<p style="color:#f87171;">Failed to load.</p>'; }
 }
-
-async function approveTutor(id) { try { await admin.approveTutor(id); loadPending(); loadStats(); } catch (err) { alert(err.message); } }
-async function rejectTutor(id) { if (!confirm('Are you sure?')) return; try { await admin.rejectTutor(id); loadPending(); loadStats(); } catch (err) { alert(err.message); } }
 
 async function loadAllBookings() {
+  const container = document.getElementById('panel-bookings');
   try {
-    const list = await admin.allBookings();
-    const container = document.getElementById('all-bookings-content');
-    if (list.length === 0) { container.innerHTML = `<div class="empty-state"><h3>No bookings yet</h3></div>`; return; }
-    container.innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Student</th><th>Tutor</th><th>Type</th><th>Subject</th><th>Date</th><th>Time</th><th>Status</th><th>Room</th></tr></thead><tbody>${list.map(b => {
-      const statusClass = `status-${b.status}`;
-      const typeLabel = b.booking_type === 'package' ? '<span class="badge badge-accent">Package</span>' : '<span class="badge badge-neutral">Session</span>';
-      const roomLink = b.room_url ? `<a href="${b.room_url}" target="_blank" style="font-size:12px;">Open</a>` : '—';
-      return `<tr><td>#${b.id}</td><td class="cell-name">${b.student_name}</td><td class="cell-name">${b.tutor_name}</td><td>${typeLabel}</td><td>${b.subject}</td><td>${b.session_date}</td><td>${b.session_time}</td><td><span class="status ${statusClass}"><span class="status-dot"></span>${b.status}</span></td><td>${roomLink}</td></tr>`;
-    }).join('')}</tbody></table></div>`;
-  } catch (err) { document.getElementById('all-bookings-content').innerHTML = `<p style="color:var(--danger);">${err.message}</p>`; }
+    const res = await apiFetch('/api/admin/bookings');
+    const bookings = await res.json();
+    if (!bookings.length) { container.innerHTML = '<p style="color:#64748b;">No bookings yet.</p>'; return; }
+    let html = '<div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>ID</th><th>Student</th><th>Tutor</th><th>Subject</th><th>Date</th><th>Time</th><th>Status</th><th>Video</th></tr></thead><tbody>';
+    for (const b of bookings) {
+      const statusClass = b.status === 'confirmed' ? 'badge-approved' : b.status === 'pending' ? 'badge-pending' : 'badge-danger';
+      html += `<tr>
+        <td>#${b.id}</td><td>${b.student_name}</td><td>${b.tutor_name}</td><td>${b.subject}</td>
+        <td>${b.session_date}</td><td>${b.session_time}</td>
+        <td><span class="badge ${statusClass}">${b.status}</span></td>
+        <td>${b.room_url ? `<a href="${b.room_url}" target="_blank" style="color:#60a5fa;">Join</a>` : '—'}</td>
+      </tr>`;
+    }
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  } catch (e) { container.innerHTML = '<p style="color:#f87171;">Failed to load.</p>'; }
 }
 
 async function loadAllUsers() {
+  const container = document.getElementById('panel-users');
   try {
-    const list = await admin.allUsers();
-    const container = document.getElementById('all-users-content');
-    container.innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th></tr></thead><tbody>${list.map(u => `<tr><td>#${u.id}</td><td class="cell-name">${u.full_name}</td><td>${u.email}</td><td>${u.phone || '—'}</td><td><span class="badge badge-neutral">${u.role}</span></td><td>${u.created_at.split('T')[0]}</td></tr>`).join('')}</tbody></table></div>`;
-  } catch (err) { document.getElementById('all-users-content').innerHTML = `<p style="color:var(--danger);">${err.message}</p>`; }
+    const res = await apiFetch('/api/admin/users');
+    const users = await res.json();
+    if (!users.length) { container.innerHTML = '<p style="color:#64748b;">No users found.</p>'; return; }
+    let html = '<div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
+    for (const u of users) {
+      const roleClass = u.role === 'admin' ? 'badge-admin' : u.role === 'tutor' ? 'badge-tutor' : 'badge-student';
+      html += `<tr>
+        <td><strong>${u.full_name}</strong></td><td>${u.email}</td><td>${u.phone || '—'}</td>
+        <td><span class="badge ${roleClass}">${u.role}</span></td>
+        <td>${new Date(u.created_at).toLocaleDateString()}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="openResetModal(${u.id}, '${u.full_name.replace(/'/g,"\\'")}')">Reset Password</button>
+        </td>
+      </tr>`;
+    }
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  } catch (e) { container.innerHTML = '<p style="color:#f87171;">Failed to load.</p>'; }
 }
 
-loadStats(); loadPending(); loadAllBookings(); loadAllUsers();
-</script>
+async function approveTutor(id) {
+  try {
+    const res = await apiFetch(`/api/admin/tutors/${id}/approve`, { method: 'PUT' });
+    if (res.ok) { alert('Tutor approved!'); loadPendingTutors(); loadStats(); }
+    else alert('Failed.');
+  } catch (e) { alert('Network error.'); }
+}
+async function rejectTutor(id) {
+  if (!confirm('Reject this tutor?')) return;
+  try {
+    const res = await apiFetch(`/api/admin/tutors/${id}`, { method: 'DELETE' });
+    if (res.ok) { alert('Tutor rejected.'); loadPendingTutors(); loadStats(); }
+    else alert('Failed.');
+  } catch (e) { alert('Network error.'); }
+}
 
-<footer class="footer">
-  <p>LearnLink — Connecting students with great tutors across Botswana.</p>
-  <div class="footer-links">
-    <a href="/">Home</a>
-    <a href="/terms.html">Terms & Conditions</a>
-    <a href="mailto:hello@learnlink.bw">hello@learnlink.bw</a>
-  </div>
-</footer>
+/* ========== RESET PASSWORD MODAL ========== */
+function openResetModal(userId, userName) {
+  resetUserId = userId;
+  document.getElementById('resetUserName').textContent = userName;
+  document.getElementById('adminNewPassword').value = '';
+  document.getElementById('adminConfirmPassword').value = '';
+  document.getElementById('resetAlert').style.display = 'none';
+  document.getElementById('resetModal').classList.add('active');
+}
+function closeResetModal(e) {
+  if (!e || e.target.id === 'resetModal') {
+    document.getElementById('resetModal').classList.remove('active');
+  }
+}
+
+document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertBox = document.getElementById('resetAlert');
+  alertBox.style.display = 'none';
+  const newPass = document.getElementById('adminNewPassword').value;
+  const confirmPass = document.getElementById('adminConfirmPassword').value;
+  if (newPass !== confirmPass) {
+    alertBox.className = 'alert alert-error';
+    alertBox.textContent = 'Passwords do not match.';
+    alertBox.style.display = 'block';
+    return;
+  }
+  try {
+    const res = await apiFetch(`/api/admin/users/${resetUserId}/reset-password`, {
+      method: 'PUT',
+      body: JSON.stringify({ new_password: newPass })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alertBox.className = 'alert alert-success';
+      alertBox.textContent = 'Password reset successfully!';
+      alertBox.style.display = 'block';
+      document.getElementById('resetPasswordForm').reset();
+      setTimeout(() => closeResetModal(), 1500);
+    } else {
+      alertBox.className = 'alert alert-error';
+      alertBox.textContent = data.error || 'Failed to reset password';
+      alertBox.style.display = 'block';
+    }
+  } catch (err) {
+    alertBox.className = 'alert alert-error';
+    alertBox.textContent = 'Network error.';
+    alertBox.style.display = 'block';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.location.href = '/';
+});
+
+init();
+</script>
 </body>
 </html>
